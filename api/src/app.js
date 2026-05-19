@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const logRequest = require('./middlewares/logginMiddleware');
 
+const authRoute = require('./routes/authRoute');
+
 const app = express();
 
 app.use(cors());
@@ -13,5 +15,7 @@ app.get('/health', (req, res) => {
         status: 'ok'
     });
 });
+
+app.use('/auth', authRoute);
 
 module.exports = app;
