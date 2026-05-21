@@ -26,6 +26,9 @@ O sistema usa:
 ### Autenticação
 - `POST /auth/login` - realiza login de usuário com email e senha.
 - `POST /auth/register` - registra novo usuário mediante convite válido.
+- `POST /auth/reset-password` - inicia o fluxo de redefinição de senha para um e-mail cadastrado.
+- `POST /auth/confirm-reset` - confirma a redefinição de senha com token e nova senha.
+- `POST /auth/validate` - valida token JWT ativo.
 
 ### Usuário
 - `POST /api/users/invite` - envia convite por e-mail para um novo usuário entrar na mesma instituição.
@@ -75,6 +78,13 @@ O sistema usa:
   - body: `{ email, password }`
 - `POST /auth/register`
   - body: `{ name, invite, email, password }`
+- `POST /auth/reset-password`
+  - body: `{ email }`
+- `POST /auth/confirm-reset`
+  - body: `{ token, newPassword }`
+- `POST /auth/validate`
+  - header: `Authorization: Bearer <token>`
+  - resposta: validação de token JWT
 
 ### Usuários
 - `POST /api/users/invite`
