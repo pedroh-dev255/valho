@@ -3,6 +3,7 @@ require('dotenv').config();
 const app = require('./app');
 const pool = require('./configs/db');
 const redisClient = require('./configs/redis');
+const {syncPermissions} = require('./services/permissionSyncService');
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,6 +17,9 @@ async function startServer() {
 
         // REDIS
         await redisClient.connect();
+
+        // SINCRONIZA PERMISSÕES
+        await syncPermissions();
 
         // START SERVER
         app.listen(PORT, () => {

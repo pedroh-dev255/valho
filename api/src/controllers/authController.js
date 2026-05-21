@@ -1,3 +1,4 @@
+// authController.js
 const authService = require('../services/authService');
 
 async function loginController(req, res) {
@@ -36,12 +37,12 @@ async function loginController(req, res) {
 
 async function registerController(req, res) {
     try {
-        const { name, email, password } = req.body;
+        const { name, invite, email, password } = req.body;
 
-        if (!name || !email || !password) {
+        if (!name || !invite || !email || !password) {
             return res.status(400).json({
                 sucess: false,
-                message: 'Nome, email e senha são obrigatórios'
+                message: 'Nome, convite, email e senha são obrigatórios'
             });
         }
 
@@ -79,8 +80,15 @@ async function registerController(req, res) {
                 message: 'Email já cadastrado'
             });
         }
+        const inviteCheck = await authService.existInvite(invite);
+        if (!inviteCheck.exists) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Convite inválido'
+            });
+        }
 
-        const user = await authService.register(name, email, password);
+        const user = await authService.register(name, inviteCheck.id, email, password);
 
         if (!user) {
             return res.status(500).json({
@@ -88,6 +96,8 @@ async function registerController(req, res) {
                 message: 'Erro ao registrar usuário'
             });
         }
+        
+        await authService.useInvite(invite);
 
         return res.status(201).json({
             sucess: true,
@@ -102,6 +112,7 @@ async function registerController(req, res) {
         });
     }
 }
+
 
 module.exports = {
     login: loginController,

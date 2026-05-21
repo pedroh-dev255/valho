@@ -1,3 +1,4 @@
+// logginMiddleware.js
 const fs = require('fs');
 const path = require('path');
 
@@ -151,7 +152,7 @@ const logger = (req, res, next) => {
             `IP:${ip} ` +
             `USER:${user} ` +
             `REQ:${JSON.stringify(sanitizedRequest)} ` +
-            `RES:${JSON.stringify(sanitizedResponse.message)}`;
+            `RES:${JSON.stringify(sanitizedResponse)}`;
 
         // =========================
         // TERMINAL
