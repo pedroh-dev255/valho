@@ -1,6 +1,22 @@
 // authController.js
 const authService = require('../services/authService');
 
+function validaPassword(password) {
+    if (password.length < 8) {
+        return false
+    }
+    if (!/\d/.test(password)) {
+        return false
+    }
+    if (!/[A-Z]/.test(password)) {
+        return false
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        return false
+    }
+    return true;
+}
+
 async function loginController(req, res) {
     try {
         const { email, password } = req.body;
@@ -46,31 +62,10 @@ async function registerController(req, res) {
             });
         }
 
-        if (password.length < 8) {
+        if (!validaPassword(password)) {
             return res.status(400).json({
                 sucess: false,
-                message: 'Senha deve ter pelo menos 8 caracteres'
-            });
-        }
-
-        if (!/\d/.test(password)) {
-            return res.status(400).json({
-                sucess: false,
-                message: 'Senha deve conter pelo menos um número'
-            });
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            return res.status(400).json({
-                sucess: false,
-                message: 'Senha deve conter pelo menos uma letra maiúscula'
-            });
-        }
-
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            return res.status(400).json({
-                sucess: false,
-                message: 'Senha deve conter pelo menos um caractere especial'
+                message: 'Senha não atende aos requisitos de segurança: mínimo 8 caracteres, pelo menos um número, uma letra maiúscula e um caractere especial'
             });
         }
 
@@ -96,7 +91,7 @@ async function registerController(req, res) {
                 message: 'Erro ao registrar usuário'
             });
         }
-        
+
         await authService.useInvite(invite);
 
         return res.status(201).json({
@@ -113,8 +108,70 @@ async function registerController(req, res) {
     }
 }
 
+async function resetPassword(req, res) {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Email é obrigatório'
+            });
+        }
+
+        if (!await authService.existEmail(email)) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Email não encontrado'
+            });
+        }
+
+        return res.status(200).json({
+            sucess: true,
+            message: 'Email de redefinição de senha enviado com sucesso'
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            sucess: false,
+            message: 'Erro ao redefinir senha',
+            error: error.message
+        });
+    }
+}
+
+async function confirmReset(req, res) {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Token e nova senha são obrigatórios'
+            });
+        }
+
+        if (!validaPassword(newPassword)) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Senha não atende aos requisitos de segurança: mínimo 8 caracteres, pelo menos um número, uma letra maiúscula e um caractere especial'
+            });
+        }
+
+
+    } catch (error) {
+        return res.status(500).json({
+            sucess: false,
+            message: 'Erro ao confirmar redefinição de senha',
+            error: error.message
+        });
+    }
+}
+
 
 module.exports = {
     login: loginController,
-    register: registerController
+    register: registerController,
+    resetPassword,
+    confirmReset
 };

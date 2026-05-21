@@ -11,7 +11,7 @@ function authMiddleware(req, res, next) {
 
     if (!token) {
         return res.status(401).json({
-            sucess: false,
+            success: false,
             message: 'Acesso não autorizado'
         });
     }
@@ -22,7 +22,7 @@ function authMiddleware(req, res, next) {
         next();
     } catch (error) {
         return res.status(401).json({
-            sucess: false,
+            success: false,
             message: 'Token inválido'
         });
     }

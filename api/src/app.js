@@ -22,6 +22,14 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/auth', authRoute);
+
+app.post('/auth/validate', authMiddleware, (req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: 'Token válido'
+    });
+});
+
 app.use('/api/users', authMiddleware, userRoute);
 
 
@@ -35,25 +43,6 @@ app.post("/api/security", authMiddleware, permissionMiddleware("users."), async 
         return res.status(500).json({
             success: false,
             message: 'Erro ao verificar permissão',
-            error: error.message
-        });
-    }
-});
-
-
-app.post("/api/mail", authMiddleware, async (req, res) => {
-    try {
-        const { to, subject, title, body, link } = req.body;
-        const result = await sendEmailService(to, subject, title, body, link);
-        return res.json({
-            success: true,
-            message: 'Email enviado com sucesso',
-            result
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Erro ao enviar email',
             error: error.message
         });
     }
