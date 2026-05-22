@@ -29,6 +29,13 @@ async function loginController(req, res) {
             });
         }
 
+        if (!await authService.isUserActive(email)) {
+            return res.status(401).json({
+                sucess: false,
+                message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
+            });
+        }
+
         const user = await authService.login(email, password);
 
         if (!user) {
@@ -37,6 +44,8 @@ async function loginController(req, res) {
                 message: 'Email ou senha inválidos'
             });
         }
+
+
 
         return res.status(200).json({
             sucess: true,
@@ -109,6 +118,25 @@ async function registerController(req, res) {
     }
 }
 
+async function logout(req, res) {
+    try {
+        const userId = req.user.id;
+        
+
+        await authService.logout(userId);
+        return res.status(200).json({
+            sucess: true,
+            message: 'Logout realizado com sucesso'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            sucess: false,
+            message: 'Erro ao realizar logout',
+            error: error.message
+        });
+    }
+}
+
 async function resetPassword(req, res) {
     try {
         const { email } = req.body;
@@ -124,6 +152,13 @@ async function resetPassword(req, res) {
             return res.status(400).json({
                 sucess: false,
                 message: 'Email não encontrado'
+            });
+        }
+
+        if (!await authService.isUserActive(email)) {
+            return res.status(401).json({
+                sucess: false,
+                message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
             });
         }
 
@@ -168,6 +203,13 @@ async function confirmReset(req, res) {
             });
         }
 
+        if (!await authService.isUserActive(email)) {
+            return res.status(401).json({
+                sucess: false,
+                message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
+            });
+        }
+
         const response = await userService.confirmReset(token, password);
 
         if (!response) {
@@ -195,6 +237,7 @@ async function confirmReset(req, res) {
 module.exports = {
     login: loginController,
     register: registerController,
+    logout,
     resetPassword,
     confirmReset
 };

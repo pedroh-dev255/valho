@@ -3,6 +3,7 @@ PORT=3000
 JWT_SECRET="your_jwt_secret_key"
 JWT_EXPIRES_IN="24h"
 FRONTEND_URL=http://localhost:3001
+SESSION_TTL=300
 
 #MYSQL
 DB_HOST=localhost

@@ -1,9 +1,13 @@
 // authService.js
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
 const permissionService = require('./permissionService');
 const pool = require('../configs/db');
+const redis = require('../configs/redis');
+
+dotenv.config();
 
 async function existEmail(email) {
     try {
@@ -107,6 +111,17 @@ async function expireInvite(invite) {
     }
 }
 
+async function isUserActive(email) {
+    try {
+        const [rows] = await pool.query('SELECT status FROM users WHERE email = ?', [email]);
+        if (rows.length === 0) {
+            return false;
+        }
+        return rows[0].status === 'active';
+    } catch (error) {
+        throw new Error('Erro ao verificar status do usuário: ' + error.message);
+    }
+}
 
 async function login(email, password) {
     try {
@@ -133,11 +148,59 @@ async function login(email, password) {
         const token = jwt.sign({ id: user.id, name: user.name, email: user.email, institution_id: user.id_institution }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
         user.token = token;
 
+        await sessionCreate(user.id);
+
         await permissionService.refreshUserPermissions(user.id);
 
         return user;
     } catch (error) {
         throw new Error('Erro ao realizar login: ' + error.message);
+    }
+}
+
+async function logout(userId) {
+    try {
+        await sessionDestroy(userId);
+        await permissionService.invalidateUserPermissions(userId);
+    } catch (error) {
+        throw new Error('Erro ao realizar logout: ' + error.message);
+    }
+}
+
+async function sessionCheck(id) {
+    try {
+        const session = await redis.get(`session:user:${id}`);
+        if (!session) {
+            return false;
+        }
+        const sessionData = JSON.parse(session);
+        return sessionData.status === 'active';
+    } catch (error) {
+        throw new Error('Erro ao verificar sessão: ' + error.message);
+    }
+}
+
+async function sessionCreate(id) {
+    try {
+        await redis.setEx(
+            `session:user:${id}`,
+            process.env.SESSION_TTL || 300,
+            JSON.stringify({
+                status: 'active'
+            })
+        );
+    }
+    catch (error) {
+        throw new Error('Erro ao criar sessão: ' + error.message);
+    }
+}
+
+async function sessionDestroy(id) {
+    try {
+        await redis.del(`session:user:${id}`);
+    }
+    catch (error) {
+        throw new Error('Erro ao destruir sessão: ' + error.message);
     }
 }
 
@@ -159,5 +222,8 @@ module.exports = {
     useInvite,
     expireInvite,
     login,
-    register
+    register,
+    isUserActive,
+    sessionCheck,
+    logout
 };

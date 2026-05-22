@@ -22,9 +22,9 @@ export async function POST(request) {
       body: JSON.stringify({ email }),
       cache: 'no-store',
     });
-    if (!res.ok) return NextResponse.json({ success: false, message: res.message  }, { status: 401});
-
     const json = await res.json();
+    if (!res.ok) return NextResponse.json({ success: false, message: json.message  }, { status: 401});
+
 
     return NextResponse.json({data: json.data }, { status: 200 });
   } catch (err) {
