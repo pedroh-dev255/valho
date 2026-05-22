@@ -23,6 +23,12 @@
   }
 }
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(200%);
+  }
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

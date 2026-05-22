@@ -203,12 +203,6 @@ async function confirmReset(req, res) {
             });
         }
 
-        if (!await authService.isUserActive(email)) {
-            return res.status(401).json({
-                sucess: false,
-                message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
-            });
-        }
 
         const response = await userService.confirmReset(token, password);
 

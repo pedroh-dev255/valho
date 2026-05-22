@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 export default function ToastProvider() {
   return (
         <Toaster
-            position="bottom-right"
+            position="top-right"
             toastOptions={{
                 style: {
                 background: '#333',
