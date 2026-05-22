@@ -110,12 +110,16 @@ async function expireInvite(invite) {
 
 async function login(email, password) {
     try {
-        const [rows] = await pool.query('SELECT id, id_institution, name, email, password FROM users WHERE email = ?', [email]);
+        const [rows] = await pool.query('SELECT id, id_institution, name, email, status, password FROM users WHERE email = ?', [email]);
 
         if (rows.length === 0) {
             return null;
         }
         const user = rows[0];
+
+        if (user.status !== 'active') {
+            throw new Error('Usuário inativo, entre em contato com o administrador para ativar sua conta');
+        }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {

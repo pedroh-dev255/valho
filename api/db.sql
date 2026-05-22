@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS institutions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into institutions (name, email, cnpj) values ('Instituição de Teste', 'henriquepedro1912@gmail.com', '12.345.678/0001-90');
-
 CREATE TABLE IF NOT EXISTS invites (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
@@ -63,8 +61,6 @@ CREATE TABLE IF NOT EXISTS roles (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into roles (id_institution, name, description) values (1, 'Admin', 'Administrador com acesso total');
-
 CREATE TABLE IF NOT EXISTS role_permissions (
     role_id INT NOT NULL,
     permission_id INT NOT NULL,
@@ -79,7 +75,6 @@ CREATE TABLE IF NOT EXISTS role_permissions (
         REFERENCES permissions(id)
         ON DELETE CASCADE
 );
-insert into role_permissions (role_id, permission_id) values (1, 2), (1, 3), (1, 5), (1, 6), (1, 7);
 
 CREATE TABLE user_roles (
     user_id INT,
