@@ -23,6 +23,7 @@ export async function POST(request) {
       body: JSON.stringify({ token, password }),
       cache: 'no-store',
     });
+
     //console.log(res);
     if (!res.ok) return NextResponse.json({ success: false }, { status: 401 });
 

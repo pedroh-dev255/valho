@@ -1,5 +1,6 @@
 // authController.js
 const authService = require('../services/authService');
+const userService = require('../services/userService');
 
 function validaPassword(password) {
     if (password.length < 8) {
@@ -126,6 +127,15 @@ async function resetPassword(req, res) {
             });
         }
 
+        const response = await userService.resetPassword(email);
+
+        if (!response) {
+            return res.status(500).json({
+                sucess: false,
+                message: 'Erro ao enviar email de redefinição de senha'
+            });
+        }
+
         return res.status(200).json({
             sucess: true,
             message: 'Email de redefinição de senha enviado com sucesso'
@@ -142,21 +152,34 @@ async function resetPassword(req, res) {
 
 async function confirmReset(req, res) {
     try {
-        const { token, newPassword } = req.body;
+        const { token, password } = req.body;
 
-        if (!token || !newPassword) {
+        if (!token || !password) {
             return res.status(400).json({
                 sucess: false,
                 message: 'Token e nova senha são obrigatórios'
             });
         }
 
-        if (!validaPassword(newPassword)) {
+        if (!validaPassword(password)) {
             return res.status(400).json({
                 sucess: false,
                 message: 'Senha não atende aos requisitos de segurança: mínimo 8 caracteres, pelo menos um número, uma letra maiúscula e um caractere especial'
             });
         }
+
+        const response = await userService.confirmReset(token, password);
+
+        if (!response) {
+            return res.status(400).json({
+                sucess: false,
+                message: 'Token inválido ou expirado'
+            });
+        }
+        return res.status(200).json({
+            sucess: true,
+            message: 'Senha redefinida com sucesso'
+        });
 
 
     } catch (error) {

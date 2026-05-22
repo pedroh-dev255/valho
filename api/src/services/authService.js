@@ -1,8 +1,9 @@
 // authService.js
-const pool = require('../configs/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const permissionService = require('./permissionService');
+const pool = require('../configs/db');
 
 async function existEmail(email) {
     try {
