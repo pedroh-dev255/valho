@@ -10,7 +10,7 @@ import Sidebar from "../_components/Sidebar";
 
 export default function Configs() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [hasPermission, setHasPermission] = useState(false);
+    const [hasPermission, setHasPermission] = useState(true);
 
 
     // tela de sem permissão
@@ -33,20 +33,18 @@ export default function Configs() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-100 dark:bg-[#09090B] text-zinc-900 dark:text-white">
+        <div className="min-h-screen bg-zinc-100 dark:bg-[#09090B] text-zinc-900 dark:text-white overflow-hidden">
             <Sidebar
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
             />
-
-            {/* MAIN */}
-            <div className="lg:ml-72 min-h-screen flex flex-col">
-                <div className="p-4">
-                    <h1 className="text-2xl font-bold mb-4">Configurações</h1>
-                    <p>Em breve...</p>
+            <div className="lg:ml-72 min-h-screen flex items-center justify-center">
+                <div className="bg-white dark:bg-[#111113] border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 text-center">
+                    <img src="jack-hammer-construction-worker-ezgif.com-gif-maker.gif" alt="Site em Construção" className="mx-auto mb-4" />
+                    <h2 className="text-2xl font-semibold mb-2">Site em Construção</h2>
+                    <p className="text-zinc-500">Estamos trabalhando para trazer melhorias para você!</p>
                 </div>
             </div>
-
         </div>
     );
 

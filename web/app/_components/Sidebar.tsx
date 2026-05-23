@@ -8,7 +8,12 @@ import {
     X,
     Sun,
     Moon,
-    LogOut
+    LogOut,
+    ChevronDown,
+    Users,
+    ShieldCheck,
+    Mail,
+    SlidersHorizontal
 } from "lucide-react";
 
 import {
@@ -23,6 +28,18 @@ interface SidebarProps {
     setSidebarOpen: (value: boolean) => void;
 }
 
+type IconType = React.ComponentType<
+    React.SVGProps<SVGSVGElement> & { size?: number }
+>;
+
+interface MenuItem {
+    label: string;
+    icon: IconType;
+    url: string;
+    key?: string;
+    children?: MenuItem[];
+}
+
 export default function Sidebar({
     sidebarOpen,
     setSidebarOpen
@@ -32,6 +49,10 @@ export default function Sidebar({
 
     const [mounted, setMounted] = React.useState(false);
     const [isDarkMode, setIsDarkMode] = React.useState(true);
+
+    const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>({
+        configuracoes: false
+    });
 
     React.useEffect(() => {
         setMounted(true);
@@ -73,7 +94,38 @@ export default function Sidebar({
         }
     }
 
-    const menuItems = [
+    function toggleMenu(menu: string) {
+        setOpenMenus((prev) => ({
+            ...prev,
+            [menu]: !prev[menu]
+        }));
+    }
+
+    const getMenuKey = (item: MenuItem) => item.key ?? item.url;
+
+    const itemContainsPath = (item: MenuItem, path: string): boolean =>
+        item.url === path ||
+        (item.children?.some((child) => itemContainsPath(child, path)) ?? false);
+
+    React.useEffect(() => {
+        setOpenMenus(() => {
+            const next: Record<string, boolean> = {};
+
+            const fillOpenState = (items: MenuItem[]) => {
+                items.forEach((item) => {
+                    if (!item.children?.length) return;
+
+                    next[getMenuKey(item)] = itemContainsPath(item, pathname);
+                    fillOpenState(item.children);
+                });
+            };
+
+            fillOpenState(menuItems);
+            return next;
+        });
+    }, [pathname]);
+
+    const menuItems: MenuItem[] = [
         {
             label: "Dashboard",
             icon: LayoutDashboard,
@@ -92,7 +144,38 @@ export default function Sidebar({
         {
             label: "Configurações",
             icon: Settings,
-            url: "/configuracoes"
+            url: "/configuracoes",
+            key: "configuracoes",
+
+            children: [
+                {
+                    label: "Geral",
+                    icon: SlidersHorizontal,
+                    url: "/configuracoes"
+                },
+                {
+                    label: "Usuários",
+                    icon: Users,
+                    url: "/configuracoes/usuarios",
+                    children: [
+                        {
+                            label: "Todos os Usuários",
+                            icon: Users,
+                            url: "/configuracoes/usuarios"
+                        },
+                        {
+                            label: "Convites Pendentes",
+                            icon: Mail,
+                            url: "/configuracoes/usuarios/convites"
+                        }
+                    ]
+                },
+                {
+                    label: "Permissões",
+                    icon: ShieldCheck,
+                    url: "/configuracoes/permissoes"
+                }
+            ]
         }
     ];
 
@@ -172,44 +255,250 @@ export default function Sidebar({
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
-
-                        const isActive =
-                            pathname === item.url;
+                        const menuKey = getMenuKey(item);
+                        const children = item.children ?? [];
+                        const hasChildren = children.length > 0;
+                        const isActive = itemContainsPath(item, pathname);
+                        const isMenuOpen = openMenus[menuKey] ?? false;
 
                         return (
-                            <button
+                            <div
                                 key={item.label}
-                                onClick={() => {
-                                    router.push(item.url);
-                                    setSidebarOpen(false);
-                                }}
-                                className={`
-                                    w-full flex items-center gap-4
-                                    px-4 py-3 rounded-2xl
-                                    transition-all duration-200
-
-                                    ${
-                                        isActive
-                                            ? `
-                                                bg-emerald-500
-                                                text-black
-                                                shadow-lg
-                                                shadow-emerald-500/20
-                                            `
-                                            : `
-                                                text-zinc-700 dark:text-zinc-300
-                                                hover:bg-zinc-100
-                                                dark:hover:bg-zinc-800
-                                            `
-                                    }
-                                `}
+                                className="space-y-2"
                             >
-                                <Icon size={20} />
+                                {/* ITEM PRINCIPAL */}
+                                <button
+                                    onClick={() => {
+                                        if (hasChildren) {
+                                            if (!isMenuOpen) {
+                                                toggleMenu(menuKey);
+                                            }
 
-                                <span className="font-medium">
-                                    {item.label}
-                                </span>
-                            </button>
+                                            router.push(children[0].url);
+                                            setSidebarOpen(false);
+                                            return;
+                                        }
+
+                                        router.push(item.url);
+                                        setSidebarOpen(false);
+                                    }}
+                                    className={`
+                                        w-full flex items-center justify-between
+                                        px-4 py-3 rounded-2xl
+                                        transition-all duration-200
+
+                                        ${
+                                            isActive
+                                                ? `
+                                                    bg-emerald-500
+                                                    text-black
+                                                    shadow-lg
+                                                    shadow-emerald-500/20
+                                                `
+                                                : `
+                                                    text-zinc-700 dark:text-zinc-300
+                                                    hover:bg-zinc-100
+                                                    dark:hover:bg-zinc-800
+                                                `
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <Icon size={20} />
+
+                                        <span className="font-medium">
+                                            {item.label}
+                                        </span>
+                                    </div>
+
+                                    {hasChildren && (
+                                        <ChevronDown
+                                            size={18}
+                                            className={`
+                                                transition-transform
+                                                ${
+                                                    isMenuOpen
+                                                        ? "rotate-180"
+                                                        : ""
+                                                }
+                                            `}
+                                        />
+                                    )}
+                                </button>
+
+                                {/* SUBMENU */}
+                                {hasChildren &&
+                                    isMenuOpen && (
+                                        <div
+                                            className="
+                                                ml-4 pl-4
+                                                border-l border-zinc-200
+                                                dark:border-zinc-800
+                                                space-y-1
+                                            "
+                                        >
+                                            {children.map((child) => {
+                                                const ChildIcon = child.icon;
+                                                const childKey = getMenuKey(child);
+                                                const childChildren = child.children ?? [];
+                                                const childHasChildren =
+                                                    childChildren.length > 0;
+                                                const isChildActive =
+                                                    itemContainsPath(
+                                                        child,
+                                                        pathname
+                                                    );
+                                                const isChildOpen =
+                                                    openMenus[childKey] ?? false;
+
+                                                return (
+                                                    <div
+                                                        key={child.label}
+                                                        className="space-y-2"
+                                                    >
+                                                        <button
+                                                            onClick={() => {
+                                                                if (
+                                                                    childHasChildren
+                                                                ) {
+                                                                    if (!isChildOpen) {
+                                                                        toggleMenu(
+                                                                            childKey
+                                                                        );
+                                                                    }
+
+                                                                    router.push(
+                                                                        childChildren[0].url
+                                                                    );
+                                                                    setSidebarOpen(
+                                                                        false
+                                                                    );
+                                                                    return;
+                                                                }
+
+                                                                router.push(child.url);
+                                                                setSidebarOpen(
+                                                                    false
+                                                                );
+                                                            }}
+                                                            className={`
+                                                                w-full flex items-center justify-between
+                                                                gap-3
+                                                                px-3 py-2.5 rounded-xl
+                                                                text-sm
+                                                                transition-all
+
+                                                                ${
+                                                                    isChildActive
+                                                                        ? `
+                                                                            bg-emerald-500/15
+                                                                            text-emerald-500
+                                                                        `
+                                                                        : `
+                                                                            text-zinc-600 dark:text-zinc-400
+                                                                            hover:bg-zinc-100
+                                                                            dark:hover:bg-zinc-800
+                                                                        `
+                                                                }
+                                                            `}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <ChildIcon
+                                                                    size={16}
+                                                                />
+
+                                                                <span>
+                                                                    {child.label}
+                                                                </span>
+                                                            </div>
+
+                                                            {childHasChildren && (
+                                                                <ChevronDown
+                                                                    size={16}
+                                                                    className={`
+                                                                        transition-transform
+                                                                        ${
+                                                                            isChildOpen
+                                                                                ? "rotate-180"
+                                                                                : ""
+                                                                        }
+                                                                    `}
+                                                                />
+                                                            )}
+                                                        </button>
+
+                                                        {childHasChildren &&
+                                                            isChildOpen && (
+                                                                <div
+                                                                    className="
+                                                                        ml-4 pl-4
+                                                                        border-l border-zinc-200
+                                                                        dark:border-zinc-800
+                                                                        space-y-1
+                                                                    "
+                                                                >
+                                                                    {childChildren.map(
+                                                                        (
+                                                                            grandchild
+                                                                        ) => {
+                                                                            const GrandchildIcon =
+                                                                                grandchild.icon;
+                                                                            const isGrandchildActive =
+                                                                                pathname ===
+                                                                                grandchild.url;
+
+                                                                            return (
+                                                                                <button
+                                                                                    key={
+                                                                                        grandchild.label
+                                                                                    }
+                                                                                    onClick={() => {
+                                                                                        router.push(
+                                                                                            grandchild.url
+                                                                                        );
+                                                                                        setSidebarOpen(
+                                                                                            false
+                                                                                        );
+                                                                                    }}
+                                                                                    className={`
+                                                                                        w-full flex items-center gap-3
+                                                                                        px-3 py-2.5 rounded-xl
+                                                                                        text-sm
+                                                                                        transition-all
+
+                                                                                        ${
+                                                                                            isGrandchildActive
+                                                                                                ? `
+                                                                                                    bg-emerald-500/15
+                                                                                                    text-emerald-500
+                                                                                                `
+                                                                                                : `
+                                                                                                    text-zinc-600 dark:text-zinc-400
+                                                                                                    hover:bg-zinc-100
+                                                                                                    dark:hover:bg-zinc-800
+                                                                                                `
+                                                                                        }
+                                                                                    `}
+                                                                                >
+                                                                                    <GrandchildIcon
+                                                                                        size={16}
+                                                                                    />
+
+                                                                                    <span>
+                                                                                        {grandchild.label}
+                                                                                    </span>
+                                                                                </button>
+                                                                            );
+                                                                        }
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                            </div>
                         );
                     })}
                 </nav>

@@ -24,14 +24,14 @@ async function loginController(req, res) {
 
         if (!email || !password) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Email e senha são obrigatórios'
             });
         }
 
         if (!await authService.isUserActive(email)) {
             return res.status(401).json({
-                sucess: false,
+                success: false,
                 message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
             });
         }
@@ -40,7 +40,7 @@ async function loginController(req, res) {
 
         if (!user) {
             return res.status(401).json({
-                sucess: false,
+                success: false,
                 message: 'Email ou senha inválidos'
             });
         }
@@ -48,13 +48,13 @@ async function loginController(req, res) {
 
 
         return res.status(200).json({
-            sucess: true,
-            message: 'Login realizado com sucesso',
+            success: true,
+            message: 'Login realizado com successo',
             user,
         });
     } catch (error) {
         return res.status(500).json({
-            sucess: false,
+            success: false,
             message: 'Erro ao realizar login',
             error: error.message
         });
@@ -67,28 +67,28 @@ async function registerController(req, res) {
 
         if (!name || !invite || !email || !password) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Nome, convite, email e senha são obrigatórios'
             });
         }
 
         if (!validaPassword(password)) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Senha não atende aos requisitos de segurança: mínimo 8 caracteres, pelo menos um número, uma letra maiúscula e um caractere especial'
             });
         }
 
         if (await authService.existEmail(email)) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Email já cadastrado'
             });
         }
         const inviteCheck = await authService.existInvite(invite);
         if (!inviteCheck.exists) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Convite inválido'
             });
         }
@@ -97,7 +97,7 @@ async function registerController(req, res) {
 
         if (!user) {
             return res.status(500).json({
-                sucess: false,
+                success: false,
                 message: 'Erro ao registrar usuário'
             });
         }
@@ -105,13 +105,13 @@ async function registerController(req, res) {
         await authService.useInvite(invite);
 
         return res.status(201).json({
-            sucess: true,
+            success: true,
             message: 'Usuário registrado com sucesso',
             user
         });
     } catch (error) {
         return res.status(500).json({
-            sucess: false,
+            success: false,
             message: 'Erro ao registrar usuário',
             error: error.message
         });
@@ -125,12 +125,12 @@ async function logout(req, res) {
 
         await authService.logout(userId);
         return res.status(200).json({
-            sucess: true,
-            message: 'Logout realizado com sucesso'
+            success: true,
+            message: 'Logout realizado com successo'
         });
     } catch (error) {
         return res.status(500).json({
-            sucess: false,
+            success: false,
             message: 'Erro ao realizar logout',
             error: error.message
         });
@@ -143,21 +143,21 @@ async function resetPassword(req, res) {
 
         if (!email) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Email é obrigatório'
             });
         }
 
         if (!await authService.existEmail(email)) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Email não encontrado'
             });
         }
 
         if (!await authService.isUserActive(email)) {
             return res.status(401).json({
-                sucess: false,
+                success: false,
                 message: 'Usuário inativo, entre em contato com o administrador para ativar sua conta'
             });
         }
@@ -166,19 +166,19 @@ async function resetPassword(req, res) {
 
         if (!response) {
             return res.status(500).json({
-                sucess: false,
+                success: false,
                 message: 'Erro ao enviar email de redefinição de senha'
             });
         }
 
         return res.status(200).json({
-            sucess: true,
-            message: 'Email de redefinição de senha enviado com sucesso'
+            success: true,
+            message: 'Email de redefinição de senha enviado com successo'
         });
 
     } catch (error) {
         return res.status(500).json({
-            sucess: false,
+            success: false,
             message: 'Erro ao redefinir senha',
             error: error.message
         });
@@ -191,14 +191,14 @@ async function confirmReset(req, res) {
 
         if (!token || !password) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Token e nova senha são obrigatórios'
             });
         }
 
         if (!validaPassword(password)) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Senha não atende aos requisitos de segurança: mínimo 8 caracteres, pelo menos um número, uma letra maiúscula e um caractere especial'
             });
         }
@@ -208,19 +208,19 @@ async function confirmReset(req, res) {
 
         if (!response) {
             return res.status(400).json({
-                sucess: false,
+                success: false,
                 message: 'Token inválido ou expirado'
             });
         }
         return res.status(200).json({
-            sucess: true,
-            message: 'Senha redefinida com sucesso'
+            success: true,
+            message: 'Senha redefinida com successo'
         });
 
 
     } catch (error) {
         return res.status(500).json({
-            sucess: false,
+            success: false,
             message: 'Erro ao confirmar redefinição de senha',
             error: error.message
         });

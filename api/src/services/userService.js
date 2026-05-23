@@ -5,6 +5,7 @@ const {existEmail} = require('./authService');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
+const { assert } = require('node:test');
 dotenv.config();
 
 async function createInvite(email, institutionId, createdBy) {
@@ -77,8 +78,29 @@ async function confirmReset(token, newPassword) {
     }
 }
 
+async function getUsersByInstitution(institutionId) {
+    try {
+        const [activeCount] = await pool.query('SELECT COUNT(*) as total_active FROM users WHERE id_institution = ? AND status = "active"', [institutionId]);
+        const [adminCount] = await pool.query('SELECT COUNT(*) as total_admin FROM users u INNER JOIN user_roles ur ON u.id = ur.user_id INNER JOIN roles r ON ur.role_id = r.id WHERE u.id_institution = ? AND r.name = "Administrador" AND u.status = "active"', [institutionId]);
+        const [pendingInvites] = await pool.query('SELECT COUNT(email) as total_pending FROM invites WHERE id_institution = ? AND status = "pending"', [institutionId]);
+        
+        const [rows] = await pool.query('SELECT users.id as id, users.name as name, users.email as email, users.status as status, roles.name as role FROM users INNER JOIN user_roles ON users.id = user_roles.user_id LEFT JOIN roles ON user_roles.role_id = roles.id WHERE users.id_institution = ?', [institutionId]);
+        
+        return {
+            total_active: activeCount[0].total_active,
+            total_admin: adminCount[0].total_admin,
+            total_pending: pendingInvites[0].total_pending,
+            users: rows
+        };
+    }
+    catch (error) {
+        throw new Error('Erro ao obter usuários: ' + error.message);
+    }
+}
+
 module.exports = {
     createInvite,
     resetPassword,
-    confirmReset
+    confirmReset,
+    getUsersByInstitution
 };

@@ -1,11 +1,11 @@
-//api/data/home/route.js
+//api/configs/users/route.js
 import { NextResponse } from "next/server";
 import { proxy } from "../../_proxy";
 
 export async function GET(request) {
     try {
         const token = request.cookies.get('token')?.value;
-        const res = await proxy(request, `${process.env.API_URL}/api/data/dashboard`,
+        const res = await proxy(request, `${process.env.API_URL}/api/config/users`,
             {
                 method: "GET",
                 headers: {

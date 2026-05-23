@@ -1,17 +1,19 @@
-//api/data/home/route.js
+//api/configs/users/invite/route.js
 import { NextResponse } from "next/server";
-import { proxy } from "../../_proxy";
+import { proxy } from "../../../_proxy";
 
-export async function GET(request) {
+export async function POST(request) {
     try {
         const token = request.cookies.get('token')?.value;
-        const res = await proxy(request, `${process.env.API_URL}/api/data/dashboard`,
+        const email = await request.json();
+        const res = await proxy(request, `${process.env.API_URL}/api/config/users/invite`,
             {
-                method: "GET",
+                method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
+                body: JSON.stringify(email),
                 cache: 'no-store',
             }
         );
@@ -20,6 +22,7 @@ export async function GET(request) {
         }
         
         const data = await res.json();
+
         return NextResponse.json(data);
     } catch (error) {
         console.error('Error fetching data:', error);

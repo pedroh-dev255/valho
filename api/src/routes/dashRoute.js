@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
+const dashboardController = require('../controllers/dashboardController');
 const permissionMiddleware = require('../middlewares/permissionMiddleware');
 
-router.post('/invite', permissionMiddleware('users.invite'), userController.invite);
-
+router.get('/', permissionMiddleware('dashboard.view'), dashboardController.getHomeData);
 
 module.exports = router;

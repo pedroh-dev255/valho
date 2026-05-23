@@ -5,7 +5,8 @@ const authMiddleware = require('./middlewares/authMiddleware');
 const permissionMiddleware = require('./middlewares/permissionMiddleware');
 
 const authRoute = require('./routes/authRoute');
-const userRoute = require('./routes/userRoute');
+const dashRoute = require('./routes/dashRoute');
+const configRoute = require('./routes/configRoute');
 
 const { sendEmailService } = require('./services/mailerService');
 
@@ -30,8 +31,8 @@ app.post('/auth/validate', authMiddleware, (req, res) => {
     });
 });
 
-app.use('/api/users', authMiddleware, userRoute);
-
+app.use('/api/data/dashboard', authMiddleware, dashRoute);
+app.use('/api/config', authMiddleware, configRoute);
 
 app.post("/api/security", authMiddleware, permissionMiddleware("users."), async (req, res) => {
     try {

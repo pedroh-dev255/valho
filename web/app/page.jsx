@@ -21,6 +21,9 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [stockAlerts, setStockAlerts] = useState([]);
+  const [activities, setActivities] = useState([]);
 
   async function fetchData(e) {
     e.preventDefault();
@@ -29,13 +32,31 @@ export default function Home() {
       const res = await fetch('/api/data/home', {
         method: 'GET'
       });
+
+      if(res.status === 403) {
+        setHasPermission(false);
+        setLoading(false);
+        toast.error(res.message || 'Acesso negado');
+        return;
+      }
+
       const data = await res.json();
 
+      setHasPermission(true);
+
       if (!res.ok || !data.success) {
-        //toast.error(data.message || 'Erro ao carregar dados');
+        toast.error(data.message || 'Erro ao carregar dados');
         setLoading(false);
         return;
       }
+
+      //data.cards, data.stockAlerts, data.activities
+      setCards(data.data?.cards);
+      setStockAlerts(data.data?.stockAlerts);
+      setActivities(data.data?.activities);
+
+      toast.success('Dados carregados com sucesso!');
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -49,6 +70,17 @@ export default function Home() {
     };
     init();
   }, []);
+
+  const icons = {
+    Wallet,
+    ArrowDownCircle,
+    ArrowUpCircle,
+    AlertTriangle,
+    PackageSearch,
+    Clock3,
+    Menu,
+    Search
+  };
 
   const container = {
     hidden: {},
@@ -109,62 +141,6 @@ export default function Home() {
       }
     }
   };
-
-  const cards = [
-    {
-      title: "Saldo Atual",
-      value: "R$ 42.820,22",
-      subtitle: "+12% esse mês",
-      icon: Wallet
-    },
-    {
-      title: "Receitas do Mês",
-      value: "R$ 98.420,00",
-      subtitle: "124 recebimentos",
-      icon: ArrowDownCircle
-    },
-    {
-      title: "Despesas do Mês",
-      value: "R$ 55.599,78",
-      subtitle: "89 pagamentos",
-      icon: ArrowUpCircle
-    },
-    {
-      title: "Itens em Falta",
-      value: "8",
-      subtitle: "2 críticos",
-      icon: AlertTriangle
-    }
-  ];
-
-  const stockAlerts = [
-    {
-      product: "Arroz 5kg",
-      stock: 2,
-      min: 10,
-      severity: "critical"
-    },
-    {
-      product: "Leite Integral",
-      stock: 6,
-      min: 15,
-      severity: "warning"
-    },
-    {
-      product: "Café Premium",
-      stock: 4,
-      min: 12,
-      severity: "critical"
-    }
-  ];
-
-  const activities = [
-    "Pagamento recebido de Cliente XPTO",
-    "Entrada de estoque realizada",
-    "Nova despesa cadastrada",
-    "Produto atualizado no estoque",
-    "Fluxo de caixa fechado"
-  ];
 
   if (loading) {
     return (
@@ -432,7 +408,7 @@ export default function Home() {
           {/* CARDS */}
           <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {cards.map((card) => {
-              const Icon = card.icon;
+              const Icon = icons[card.icon] || Wallet;
 
               return (
                 <motion.div
