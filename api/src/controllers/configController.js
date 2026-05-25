@@ -27,7 +27,7 @@ async function getActivities(req, res) {
     try {
         const { search, page } = req.query;
         const institutionId = req.user.institution_id;
-        console.log(`getActivities called with institutionId=${institutionId}, search=${search}, page=${page}`);
+        
         const activities = await activitiesService.getActivities(institutionId, search, page);
 
         return res.status(200).json({

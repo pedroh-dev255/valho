@@ -6,9 +6,6 @@ async function getActivities(
     page = 1
 ) {
     try {
-        console.log(`getActivities called with institutionId=${institutionId}, search=${search}, page=${page}`
-        );
-
         const limit = 10;
 
         page = Number(page) || 1;
