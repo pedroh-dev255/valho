@@ -556,12 +556,13 @@ export default function Usuarios() {
                                             {/* CENTER */}
                                             <div className="flex flex-wrap items-center gap-3">
                                                 <div
-                                                    className="
+                                                    className={`
                                                         px-4 h-10 rounded-xl
                                                         bg-zinc-200 dark:bg-zinc-800
                                                         flex items-center
                                                         text-sm font-medium
-                                                    "
+                                                        ${user.role === 'Administrador' ? 'text-emerald-500' : 'text-zinc-500'}
+                                                    `}
                                                 >
                                                     {
                                                         user.role
