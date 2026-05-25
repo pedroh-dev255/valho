@@ -18,7 +18,7 @@ async function existEmail(email) {
     }
 }
 
-async function existInvite(invite) {
+async function existInvite(invite, email) {
 
     try {
 
@@ -29,9 +29,9 @@ async function existInvite(invite) {
                 id_institution,
                 status
             FROM invites
-            WHERE token = ?
+            WHERE token = ? AND email = ?
             `,
-            [invite]
+            [invite, email]
         );
 
         // NÃO EXISTE

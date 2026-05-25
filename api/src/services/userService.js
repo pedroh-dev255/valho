@@ -98,9 +98,42 @@ async function getUsersByInstitution(institutionId) {
     }
 }
 
+async function getUsersById(userId) {
+    try {
+        const [rows] = await pool.query('SELECT users.id as id, users.name as name, users.email as email, users.status as status, roles.name as role FROM users INNER JOIN user_roles ON users.id = user_roles.user_id LEFT JOIN roles ON user_roles.role_id = roles.id WHERE users.id = ?', [userId]);
+        if (rows.length === 0) {
+            return null;
+        }
+        return rows[0];
+    } catch (error) {
+        throw new Error('Erro ao obter usuário: ' + error.message);
+    }
+}
+
+async function getInvitesByInstitution(InstitutionId) {
+    try {
+        const [rows] = await pool.query('SELECT * FROM invites WHERE id_institution = ? AND status = "pending"', [InstitutionId]);
+        return rows;
+    } catch (error) {
+        throw new Error('Erro ao obter convites: ' + error.message);
+    }
+}
+
+async function deleteInvite(inviteId, institutionId) {
+    try {
+        const [result] = await pool.query('UPDATE invites SET status = "expired" WHERE id = ? AND id_institution = ?', [inviteId, institutionId]);
+        return result.affectedRows > 0;
+    } catch (error) {
+        throw new Error('Erro ao deletar convite: ' + error.message);
+    }
+}
+
 module.exports = {
     createInvite,
     resetPassword,
     confirmReset,
-    getUsersByInstitution
+    getUsersByInstitution,
+    getUsersById,
+    getInvitesByInstitution,
+    deleteInvite
 };

@@ -85,14 +85,18 @@ async function registerController(req, res) {
                 message: 'Email já cadastrado'
             });
         }
-        const inviteCheck = await authService.existInvite(invite);
+
+        // Verificar se o invite é valido e se o email do convite corresponde ao email do registro
+        const inviteCheck = await authService.existInvite(invite, email);
+
         if (!inviteCheck.exists) {
             return res.status(400).json({
                 success: false,
-                message: 'Convite inválido'
+                message: 'Convite inválido ou email do convite não corresponde ao email de registro'
             });
         }
 
+        
         const user = await authService.register(name, inviteCheck.id, email, password);
 
         if (!user) {

@@ -1,86 +1,104 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from 'react';
 
 import {
-    EyeIcon,
-    EyeOffIcon,
+    useSearchParams,
+    useRouter
+} from 'next/navigation';
+
+import {
+    Eye,
+    EyeOff,
+    Mail,
     Lock,
-    ArrowLeft,
+    User,
     ShieldCheck,
-    CheckCheck
+    CheckCircle2,
+    XCircle,
+    ArrowLeft
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
 
 import toast from 'react-hot-toast';
 
-export default function ResetPassPage() {
+export default function RegisterPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    const [token, setToken] = useState('');
+    const params = useSearchParams();
+    const [erro, setErro] = useState('');
 
-    const [mostrarSenha, setMostrarSenha] = useState(false);
-    const [mostrarSenha2, setMostrarSenha2] = useState(false);
+    const [inviteToken, setInviteToken] = useState('');
+
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
 
     const [password, setPassword] = useState('');
     const [password2, setPassword2] = useState('');
 
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    const [mostrarSenha2, setMostrarSenha2] = useState(false);
+
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const t = searchParams.get("token");
-
-        if (!t) {
-            toast.error(
-                'Token de redefinição não encontrado!'
-            );
-
-            router.push("/login");
-
-            return;
+        const token = params.get('invite');
+        console.log(token);
+        if (token) {
+            setInviteToken(token);
+        } else {
+            toast.error('Convite inválido');
         }
 
-        setToken(t);
 
-    }, [searchParams, router]);
+    }, [params]);
 
-    function validaPassword(password) {
-        if (password.length < 8) {
-            return false;
-        }
+    // PASSWORD RULES
+    const passwordRules = useMemo(() => ({
+        minLength: password.length >= 8,
+        number: /\d/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        special:
+            /[!@#$%^&*(),.?":{}|<>]/.test(password),
+        equal:
+            password.length > 0 &&
+            password === password2
+    }), [password, password2]);
 
-        if (!/\d/.test(password)) {
-            return false;
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            return false;
-        }
-
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            return false;
-        }
-
-        return true;
+    function validaPassword() {
+        return (
+            passwordRules.minLength &&
+            passwordRules.number &&
+            passwordRules.uppercase &&
+            passwordRules.special
+        );
     }
 
-    async function handleSubmit(event) {
-        event.preventDefault();
+    async function handleSubmit(e) {
+        e.preventDefault();
 
-        if (password !== password2) {
+        if (!nome.trim()) {
             return toast.error(
-                "Senhas não conferem!"
+                'Informe seu nome'
             );
         }
 
-        if (!validaPassword(password)) {
+        if (!email.trim()) {
             return toast.error(
-                "A senha deve conter no mínimo 8 caracteres, incluindo número, letra maiúscula e caractere especial."
+                'Informe seu email'
+            );
+        }
+
+        if (!validaPassword()) {
+            return toast.error(
+                'A senha não atende os requisitos'
+            );
+        }
+
+        if (!passwordRules.equal) {
+            return toast.error(
+                'As senhas não conferem'
             );
         }
 
@@ -88,52 +106,73 @@ export default function ResetPassPage() {
 
         try {
             const res = await fetch(
-                '/api/resetpass/confirm',
+                '/api/register',
                 {
                     method: 'POST',
+
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type':
+                            'application/json'
                     },
-                    credentials: 'include',
+
                     body: JSON.stringify({
-                        token,
-                        password
+                        nome,
+                        email,
+                        password,
+                        inviteToken
                     })
                 }
             );
 
             const data = await res.json();
 
-            if (!res.ok) {
+            if (!res.ok || !data.success) {
                 throw new Error(
-                    data.error ||
-                    'Erro ao salvar nova senha'
+                    data.message ||
+                    'Erro ao criar conta'
                 );
             }
 
             toast.success(
-                'Senha redefinida com sucesso!'
+                'Conta criada com sucesso!'
             );
 
             router.push('/login');
 
         } catch (error) {
             toast.error(error.message);
+            setErro(error.message);
         } finally {
             setLoading(false);
         }
     }
 
-    const passwordChecks = {
-        minLength: password.length >= 8,
-        number: /\d/.test(password),
-        upper: /[A-Z]/.test(password),
-        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    };
-    const passwordsMatch =
-        password.length > 0 &&
-        password2.length > 0 &&
-        password === password2;
+    function RuleItem({
+        valid,
+        text
+    }) {
+        return (
+            <div
+                className={`
+                    flex items-center gap-2
+                    transition-all
+
+                    ${valid
+                        ? 'text-emerald-500'
+                        : 'text-zinc-500'
+                    }
+                `}
+            >
+                {valid ? (
+                    <CheckCircle2 size={16} />
+                ) : (
+                    <XCircle size={16} />
+                )}
+
+                <span>{text}</span>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -143,30 +182,40 @@ export default function ResetPassPage() {
                 flex items-center justify-center
                 p-4
                 text-zinc-900 dark:text-white
+                relative overflow-hidden
             "
         >
-            {/* BACKGROUND GLOW */}
+            {/* GLOW */}
             <div
                 className="
-                    absolute inset-0 overflow-hidden
+                    absolute inset-0
                     pointer-events-none
+                    overflow-hidden
                 "
             >
                 <div
                     className="
-                        absolute top-[-150px] left-[-150px]
-                        w-[400px] h-[400px]
+                        absolute
+                        top-[-200px]
+                        left-[-150px]
+                        w-[450px]
+                        h-[450px]
+                        rounded-full
                         bg-emerald-500/10
-                        blur-3xl rounded-full
+                        blur-3xl
                     "
                 />
 
                 <div
                     className="
-                        absolute bottom-[-150px] right-[-150px]
-                        w-[400px] h-[400px]
+                        absolute
+                        bottom-[-200px]
+                        right-[-150px]
+                        w-[450px]
+                        h-[450px]
+                        rounded-full
                         bg-emerald-500/10
-                        blur-3xl rounded-full
+                        blur-3xl
                     "
                 />
             </div>
@@ -187,7 +236,7 @@ export default function ResetPassPage() {
                 }}
                 className="
                     relative
-                    w-full max-w-md
+                    w-full max-w-xl
                     bg-white dark:bg-[#111113]
                     border border-zinc-200 dark:border-zinc-800
                     rounded-3xl
@@ -220,17 +269,18 @@ export default function ResetPassPage() {
                             tracking-tight
                         "
                     >
-                        Nova Senha
+                        Criar Conta
                     </h1>
 
                     <p
                         className="
-                            text-zinc-500
                             mt-3
+                            text-zinc-500
                             leading-relaxed
                         "
                     >
-                        Defina uma nova senha segura para sua conta.
+                        Finalize seu cadastro para acessar
+                        a plataforma Valho!.
                     </p>
                 </div>
 
@@ -239,6 +289,110 @@ export default function ResetPassPage() {
                     onSubmit={handleSubmit}
                     className="p-8 space-y-6"
                 >
+                    {/* NOME */}
+                    <div className="space-y-2">
+                        <label
+                            className="
+                                text-sm
+                                text-zinc-500
+                            "
+                        >
+                            Nome Completo
+                        </label>
+
+                        <div
+                            className="
+                                h-14
+                                rounded-2xl
+                                border border-zinc-200 dark:border-zinc-800
+                                bg-zinc-50 dark:bg-[#09090B]
+                                px-4
+                                flex items-center gap-3
+                                transition-all
+                                focus-within:border-emerald-500/50
+                                focus-within:ring-4
+                                focus-within:ring-emerald-500/10
+                            "
+                        >
+                            <User
+                                size={18}
+                                className="text-zinc-500"
+                            />
+
+                            <input
+                                type="text"
+                                required
+                                value={nome}
+                                onChange={(e) =>
+                                    setNome(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Seu nome"
+                                className="
+                                    w-full
+                                    bg-transparent
+                                    outline-none
+                                    text-sm
+                                    text-zinc-900 dark:text-white
+                                    placeholder:text-zinc-500
+                                "
+                            />
+                        </div>
+                    </div>
+
+                    {/* EMAIL */}
+                    <div className="space-y-2">
+                        <label
+                            className="
+                                text-sm
+                                text-zinc-500
+                            "
+                        >
+                            Email
+                        </label>
+
+                        <div
+                            className="
+                                h-14
+                                rounded-2xl
+                                border border-zinc-200 dark:border-zinc-800
+                                bg-zinc-50 dark:bg-[#09090B]
+                                px-4
+                                flex items-center gap-3
+                                transition-all
+                                focus-within:border-emerald-500/50
+                                focus-within:ring-4
+                                focus-within:ring-emerald-500/10
+                            "
+                        >
+                            <Mail
+                                size={18}
+                                className="text-zinc-500"
+                            />
+
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) =>
+                                    setEmail(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="usuario@empresa.com"
+                                className="
+                                    w-full
+                                    bg-transparent
+                                    outline-none
+                                    text-sm
+                                    text-zinc-900 dark:text-white
+                                    placeholder:text-zinc-500
+                                "
+                            />
+                        </div>
+                    </div>
+
                     {/* PASSWORD */}
                     <div className="space-y-2">
                         <label
@@ -247,12 +401,13 @@ export default function ResetPassPage() {
                                 text-zinc-500
                             "
                         >
-                            Nova Senha
+                            Senha
                         </label>
 
                         <div
                             className="
-                                h-14 rounded-2xl
+                                h-14
+                                rounded-2xl
                                 border border-zinc-200 dark:border-zinc-800
                                 bg-zinc-50 dark:bg-[#09090B]
                                 px-4
@@ -274,7 +429,6 @@ export default function ResetPassPage() {
                                         ? 'text'
                                         : 'password'
                                 }
-                                minLength={8}
                                 required
                                 value={password}
                                 onChange={(e) =>
@@ -282,7 +436,7 @@ export default function ResetPassPage() {
                                         e.target.value
                                     )
                                 }
-                                placeholder="Digite sua nova senha"
+                                placeholder="Digite sua senha"
                                 className="
                                     w-full
                                     bg-transparent
@@ -307,9 +461,9 @@ export default function ResetPassPage() {
                                 "
                             >
                                 {mostrarSenha ? (
-                                    <EyeOffIcon size={18} />
+                                    <EyeOff size={18} />
                                 ) : (
-                                    <EyeIcon size={18} />
+                                    <Eye size={18} />
                                 )}
                             </button>
                         </div>
@@ -323,12 +477,13 @@ export default function ResetPassPage() {
                                 text-zinc-500
                             "
                         >
-                            Confirmar Nova Senha
+                            Confirmar Senha
                         </label>
 
                         <div
                             className="
-                                h-14 rounded-2xl
+                                h-14
+                                rounded-2xl
                                 border border-zinc-200 dark:border-zinc-800
                                 bg-zinc-50 dark:bg-[#09090B]
                                 px-4
@@ -350,7 +505,6 @@ export default function ResetPassPage() {
                                         ? 'text'
                                         : 'password'
                                 }
-                                minLength={8}
                                 required
                                 value={password2}
                                 onChange={(e) =>
@@ -358,7 +512,7 @@ export default function ResetPassPage() {
                                         e.target.value
                                     )
                                 }
-                                placeholder="Confirme sua nova senha"
+                                placeholder="Confirme sua senha"
                                 className="
                                     w-full
                                     bg-transparent
@@ -368,6 +522,7 @@ export default function ResetPassPage() {
                                     placeholder:text-zinc-500
                                 "
                             />
+                            
 
                             <button
                                 type="button"
@@ -383,88 +538,76 @@ export default function ResetPassPage() {
                                 "
                             >
                                 {mostrarSenha2 ? (
-                                    <EyeOffIcon size={18} />
+                                    <EyeOff size={18} />
                                 ) : (
-                                    <EyeIcon size={18} />
+                                    <Eye size={18} />
                                 )}
                             </button>
                         </div>
                     </div>
 
-                    {/* PASSWORD RULES */}
+                    {/* RULES */}
                     <div
                         className="
                             rounded-2xl
                             border border-zinc-200 dark:border-zinc-800
                             bg-zinc-50 dark:bg-[#09090B]
-                            p-4
+                            p-5
+                            space-y-3
+                            text-sm
                         "
                     >
-                        <h4 className="text-sm font-medium mb-3 text-zinc-700 dark:text-zinc-300">
+                        <p
+                            className="
+                                font-medium
+                                text-zinc-400
+                            "
+                        >
                             Sua senha deve conter:
-                        </h4>
+                        </p>
 
-                        <div className="space-y-2">
-                            <div
-                                className={`
-                                    flex items-center gap-2 text-sm transition-all
-                                    ${passwordChecks.minLength
-                                        ? 'text-emerald-500'
-                                        : 'text-zinc-500'}
-                                `}
-                            >
-                                <CheckCheck size={16} />
-                                <span>Mínimo de 8 caracteres</span>
-                            </div>
+                        <RuleItem
+                            valid={
+                                passwordRules.minLength
+                            }
+                            text="Mínimo de 8 caracteres"
+                        />
 
-                            <div
-                                className={`
-                                    flex items-center gap-2 text-sm transition-all
-                                    ${passwordChecks.number
-                                        ? 'text-emerald-500'
-                                        : 'text-zinc-500'}
-                                `}
-                            >
-                                <CheckCheck size={16} />
-                                <span>Pelo menos 1 número</span>
-                            </div>
+                        <RuleItem
+                            valid={
+                                passwordRules.number
+                            }
+                            text="Pelo menos 1 número"
+                        />
 
-                            <div
-                                className={`
-                                    flex items-center gap-2 text-sm transition-all
-                                    ${passwordChecks.upper
-                                        ? 'text-emerald-500'
-                                        : 'text-zinc-500'}
-                                `}
-                            >
-                                <CheckCheck size={16} />
-                                <span>Pelo menos 1 letra maiúscula</span>
-                            </div>
+                        <RuleItem
+                            valid={
+                                passwordRules.uppercase
+                            }
+                            text="Pelo menos 1 letra maiúscula"
+                        />
 
-                            <div
-                                className={`
-                                    flex items-center gap-2 text-sm transition-all
-                                    ${passwordChecks.special
-                                        ? 'text-emerald-500'
-                                        : 'text-zinc-500'}
-                                `}
-                            >
-                                <CheckCheck size={16} />
-                                <span>Pelo menos 1 caractere especial</span>
-                            </div>
-                            <div
-                                className={`
-                                    flex items-center gap-2 text-sm transition-all
-                                    ${passwordsMatch
-                                        ? 'text-emerald-500'
-                                        : 'text-zinc-500'}
-                                `}
-                            >
-                                <CheckCheck size={16} />
-                                <span>As senhas devem ser iguais</span>
-                            </div>
-                        </div>
+                        <RuleItem
+                            valid={
+                                passwordRules.special
+                            }
+                            text="Pelo menos 1 caractere especial"
+                        />
+
+                        <RuleItem
+                            valid={
+                                passwordRules.equal
+                            }
+                            text="As senhas devem ser iguais"
+                        />
                     </div>
+
+                    {/* ERROR MESSAGE */}
+                    {erro && (
+                        <p className="text-red-500 text-sm text-center">
+                            {erro}
+                        </p>
+                    )}
 
                     {/* BUTTONS */}
                     <div className="space-y-3">
@@ -489,8 +632,8 @@ export default function ResetPassPage() {
                             "
                         >
                             {loading
-                                ? 'Salvando...'
-                                : 'Redefinir Senha'}
+                                ? 'Criando conta...'
+                                : 'Criar Conta'}
                         </motion.button>
 
                         <button

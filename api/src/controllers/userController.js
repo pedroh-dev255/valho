@@ -65,7 +65,63 @@ async function getUsers(req, res) {
     }
 }
 
+async function getInvites(req, res) {
+    try {
+        const institutionId = req.user.institution_id;
+        const invites = await userServices.getInvitesByInstitution(institutionId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Convites obtidos com sucesso',
+            invites
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao obter convites',
+            error: error.message
+        });
+    }
+}
+
+async function deleteInvite(req, res) {
+    try {
+        const { inviteId } = req.params;
+        const institutionId = req.user.institution_id;
+
+        if (!inviteId || !institutionId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do convite e instituição são obrigatórios'
+            });
+        }
+
+        const result = await userServices.deleteInvite(inviteId, institutionId);
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Convite não encontrado ou já deletado'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Convite deletado com sucesso'
+        });
+
+    }    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao deletar convite',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     invite: inviteController,
-    getUsers
+    getUsers,
+    getInvites,
+    deleteInvite
 };

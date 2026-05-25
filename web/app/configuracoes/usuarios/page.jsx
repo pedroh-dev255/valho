@@ -17,6 +17,7 @@ import {
     X,
     Send
 } from "lucide-react";
+import Link from "next/link";
 
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -347,7 +348,8 @@ export default function Usuarios() {
                                 value: totalActive,
                                 subtitle:
                                     "Atualmente ativos",
-                                icon: Users
+                                icon: Users,
+                                url: "#"
                             },
 
                             {
@@ -356,7 +358,8 @@ export default function Usuarios() {
                                 value: totalInvitesPending,
                                 subtitle:
                                     "Aguardando ativação",
-                                icon: Mail
+                                icon: Mail,
+                                url: "/configuracoes/usuarios/convites"
                             },
 
                             {
@@ -365,7 +368,8 @@ export default function Usuarios() {
                                 value: totalAdmins,
                                 subtitle:
                                     "Acesso total",
-                                icon: ShieldCheck
+                                icon: ShieldCheck,
+                                url: "/configuracoes/permissoes"
                             }
                         ].map((card) => {
                             const Icon = card.icon;
@@ -383,42 +387,44 @@ export default function Usuarios() {
                                         rounded-3xl p-6
                                     "
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="text-sm text-zinc-500">
-                                                {
-                                                    card.title
-                                                }
-                                            </p>
+                                    <Link href={card.url}>
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="text-sm text-zinc-500">
+                                                    {
+                                                        card.title
+                                                    }
+                                                </p>
 
-                                            <h3 className="text-4xl font-bold mt-4 tracking-tight">
-                                                {
-                                                    card.value
-                                                }
-                                            </h3>
+                                                <h3 className="text-4xl font-bold mt-4 tracking-tight">
+                                                    {
+                                                        card.value
+                                                    }
+                                                </h3>
 
-                                            <p className="text-sm text-emerald-500 mt-3">
-                                                {
-                                                    card.subtitle
-                                                }
-                                            </p>
+                                                <p className="text-sm text-emerald-500 mt-3">
+                                                    {
+                                                        card.subtitle
+                                                    }
+                                                </p>
+                                            </div>
+
+                                            <div
+                                                className="
+                                                    w-12 h-12 rounded-2xl
+                                                    bg-zinc-100 dark:bg-zinc-800
+                                                    flex items-center justify-center
+                                                    text-emerald-500
+                                                "
+                                            >
+                                                <Icon
+                                                    size={
+                                                        22
+                                                    }
+                                                />
+                                            </div>
                                         </div>
-
-                                        <div
-                                            className="
-                                                w-12 h-12 rounded-2xl
-                                                bg-zinc-100 dark:bg-zinc-800
-                                                flex items-center justify-center
-                                                text-emerald-500
-                                            "
-                                        >
-                                            <Icon
-                                                size={
-                                                    22
-                                                }
-                                            />
-                                        </div>
-                                    </div>
+                                    </Link>
                                 </motion.div>
                             );
                         })}
@@ -663,16 +669,20 @@ export default function Usuarios() {
                                                         transition={{
                                                             duration: 0.15
                                                         }}
-                                                        className="
-                                                            absolute right-0 top-14
-                                                            w-52
+                                                        className={`
+                                                            absolute right-0
+                                                            ${index >= filteredUsers.length - 2
+                                                                ? "bottom-14"
+                                                                : "top-14"
+                                                            }
+                                                            w-56
                                                             rounded-2xl
                                                             border border-zinc-200 dark:border-zinc-800
                                                             bg-white dark:bg-[#111113]
                                                             shadow-2xl
                                                             overflow-hidden
-                                                            z-50
-                                                        "
+                                                            z-[999]
+                                                        `}
                                                     >
                                                         <button
                                                             onClick={() =>

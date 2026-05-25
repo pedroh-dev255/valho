@@ -167,7 +167,8 @@ export default function Sidebar({
                             label: "Convites Pendentes",
                             icon: Mail,
                             url: "/configuracoes/usuarios/convites"
-                        }
+                        },
+                        
                     ]
                 },
                 {
