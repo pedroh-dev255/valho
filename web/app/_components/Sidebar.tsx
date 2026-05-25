@@ -168,7 +168,7 @@ export default function Sidebar({
                             icon: Mail,
                             url: "/configuracoes/usuarios/convites"
                         },
-                        
+
                     ]
                 },
                 {
@@ -218,6 +218,7 @@ export default function Sidebar({
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* 
                         <button
                             onClick={toggleTheme}
                             className="
@@ -249,6 +250,7 @@ export default function Sidebar({
                                 className="text-zinc-900 dark:text-white"
                             />
                         </button>
+                        */}
                     </div>
                 </div>
 

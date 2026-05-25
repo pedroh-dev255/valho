@@ -19,8 +19,6 @@ export async function POST(request) {
     );
     const data = await res.json();
 
-    console.log("Logout response:", data);
-
     if (!res.ok) {
       const data = await res.json();
       return NextResponse.json(
@@ -33,7 +31,12 @@ export async function POST(request) {
     const response = NextResponse.json({ success: true, message: data.message || "Logout realizado com sucesso" });
 
     response.cookies.set('token', '', {
-      httpOnly: true,
+      httpOnly: false,
+      expires: new Date(0), // expira o cookie imediatamente
+      path: '/',
+    });
+    response.cookies.set('userData', '', {
+      httpOnly: false,
       expires: new Date(0), // expira o cookie imediatamente
       path: '/',
     });

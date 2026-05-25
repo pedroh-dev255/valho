@@ -27,12 +27,27 @@ export async function POST(request) {
 
     const response = NextResponse.json({ success: true });
     response.cookies.set("token", data.user.token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
     });
+
+    response.cookies.set(
+      "userData",
+      JSON.stringify({
+          id: data.user.id,
+          name: data.user.name
+      }),
+      {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24,
+      }
+  );
 
     return response;
   } catch (err) {

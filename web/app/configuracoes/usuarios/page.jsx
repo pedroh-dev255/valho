@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import Sidebar from "../../_components/Sidebar";
 
 export default function Usuarios() {
+    const [userData, setUserData] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [hasPermission, setHasPermission] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -73,6 +74,11 @@ export default function Usuarios() {
 
     function handleDisableUser(user) {
         setOpenMenuId(null);
+
+        if(user.id === userData?.id) {
+            toast.error("Você não pode inativar seu próprio usuário");
+            return;
+        }
 
         toast.success(
             `Inativar usuário: ${user.name}`
@@ -141,6 +147,26 @@ export default function Usuarios() {
         e?.preventDefault();
 
         setLoading(true);
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+
+            if (parts.length === 2) {
+                return parts
+                    .pop()
+                    .split(';')
+                    .shift();
+            }
+
+            return null;
+        }
+
+        const cookie = getCookie('userData');
+
+        setUserData(cookie
+            ? JSON.parse(decodeURIComponent(cookie))
+            : null);
+
 
         try {
             const res = await fetch("/api/configs/users", { METHOD: "GET" });
@@ -179,6 +205,7 @@ export default function Usuarios() {
     }
 
     useEffect(() => {
+        
         fetchData(new Event("fetch"));
     }, []);
 
@@ -541,8 +568,9 @@ export default function Usuarios() {
                                                 <div>
                                                     <h4 className="font-semibold text-lg tracking-tight">
                                                         {
-                                                            user.name
+                                                            user.name + (user.id === userData?.id ? " (Você)" : "")
                                                         }
+
                                                     </h4>
 
                                                     <p className="text-sm text-zinc-500 mt-1">
@@ -633,7 +661,7 @@ export default function Usuarios() {
                                                     Último
                                                     acesso:{" "}
                                                     {
-                                                        user.lastAccess
+                                                        user.lastAccess ?? "Há mais de 1 dia"
                                                     }
                                                 </div>
                                             </div>
