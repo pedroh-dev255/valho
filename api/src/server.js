@@ -3,7 +3,7 @@ require('dotenv').config();
 const app = require('./app');
 const pool = require('./configs/db');
 const redisClient = require('./configs/redis');
-const {syncPermissions} = require('./services/permissionSyncService');
+const {syncPermissions, syncAdminRoles} = require('./services/permissionSyncService');
 
 const PORT = process.env.PORT || 3000;
 
@@ -20,7 +20,7 @@ async function startServer() {
 
         // SINCRONIZA PERMISSÕES
         await syncPermissions();
-
+        await syncAdminRoles();
         // START SERVER
         app.listen(PORT, () => {
             console.log(`🟢 Servidor rodando na porta ${PORT}`);
