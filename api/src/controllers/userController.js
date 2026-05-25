@@ -88,6 +88,7 @@ async function deleteInvite(req, res) {
     try {
         const { inviteId } = req.params;
         const institutionId = req.user.institution_id;
+        const userId = req.user.id;
 
         if (!inviteId || !institutionId) {
             return res.status(400).json({
@@ -96,7 +97,7 @@ async function deleteInvite(req, res) {
             });
         }
 
-        const result = await userServices.deleteInvite(inviteId, institutionId);
+        const result = await userServices.deleteInvite(userId, inviteId, institutionId);
 
         if (!result) {
             return res.status(404).json({

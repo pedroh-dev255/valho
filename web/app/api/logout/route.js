@@ -19,7 +19,7 @@ export async function POST(request) {
     );
     const data = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok) {  
       const data = await res.json();
       return NextResponse.json(
         { success: false, message: data.message || "Erro ao realizar logout" },

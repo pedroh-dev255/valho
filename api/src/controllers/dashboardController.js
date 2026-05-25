@@ -1,5 +1,12 @@
+const dashService = require('../services/dashService');
+
 async function getHomeData(req, res) {
   try {
+    const institutionId = req.user.institution_id;
+    const userId = req.user.id;
+
+
+    const data = await dashService.getDashboardData(userId, institutionId);
     const cards = [
       {
         title: "Saldo Atual",
@@ -49,13 +56,6 @@ async function getHomeData(req, res) {
       },
     ];
 
-    const activities = [
-      "Pagamento recebido de Cliente XPTO",
-      "Entrada de estoque realizada",
-      "Nova despesa cadastrada",
-      "Produto atualizado no estoque",
-      "Fluxo de caixa fechado",
-    ];
 
     return res.status(200).json({
       success: true,
@@ -63,7 +63,7 @@ async function getHomeData(req, res) {
       data: {
         cards,
         stockAlerts,
-        activities,
+        activities: data.activities,
 
       },
     });

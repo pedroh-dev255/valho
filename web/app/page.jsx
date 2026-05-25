@@ -655,34 +655,120 @@ export default function Home() {
               </div>
 
               <div className="space-y-3">
-                {activities.map((activity, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{
-                      opacity: 0,
-                      y: 10
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0
-                    }}
-                    transition={{
-                      delay: index * 0.08
-                    }}
-                    className="
-                      flex items-center gap-4
-                      p-4 rounded-2xl
-                      bg-zinc-50 dark:bg-[#09090B]
-                      border border-zinc-200 dark:border-zinc-800
-                    "
-                  >
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                {activities.map((activity, index) => {
 
-                    <span className="text-sm">
-                      {activity}
-                    </span>
-                  </motion.div>
-                ))}
+                  const levelStyles = {
+                    info: {
+                      dot: "bg-blue-500",
+                      border:
+                        "border-blue-500/20",
+                      bg:
+                        "bg-blue-500/5"
+                    },
+
+                    good: {
+                      dot: "bg-emerald-500",
+                      border:
+                        "border-emerald-500/20",
+                      bg:
+                        "bg-emerald-500/5"
+                    },
+
+                    warning: {
+                      dot: "bg-yellow-500",
+                      border:
+                        "border-yellow-500/20",
+                      bg:
+                        "bg-yellow-500/5"
+                    },
+
+                    error: {
+                      dot: "bg-red-500",
+                      border:
+                        "border-red-500/20",
+                      bg:
+                        "bg-red-500/5"
+                    }
+                  };
+
+                  const style =
+                    levelStyles[activity.level] ||
+                    levelStyles.info;
+
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{
+                        opacity: 0,
+                        y: 10
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0
+                      }}
+                      transition={{
+                        delay: index * 0.08
+                      }}
+                      className={`
+                        rounded-2xl
+                        border
+                        p-4
+                        transition-all
+
+                        ${style.border}
+                        ${style.bg}
+
+                        bg-zinc-50
+                        dark:bg-[#09090B]
+                      `}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* DOT */}
+                        <div
+                          className={`
+                            mt-1.5
+                            w-3 h-3
+                            rounded-full
+                            shrink-0
+                            ${style.dot}
+                          `}
+                        />
+
+                        {/* CONTENT */}
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className="
+                              text-sm
+                              leading-relaxed
+                              text-zinc-700
+                              dark:text-zinc-300
+                            "
+                          >
+                            {activity.details}
+                          </p>
+
+                          <p
+                            className="
+                              text-xs
+                              text-zinc-500
+                              mt-2
+                            "
+                          >
+                            {new Date(
+                              activity.created_at
+                            ).toLocaleString(
+                              'pt-BR',
+                              {
+                                dateStyle: 'short',
+                                timeStyle: 'short'
+                              }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
 

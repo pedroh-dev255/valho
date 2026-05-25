@@ -62,7 +62,8 @@ async function existInvite(invite, email) {
 
         return {
             exists: true,
-            id: inviteData.id_institution
+            id: inviteData.id_institution,
+            inviteId: inviteData.id
         };
 
     } catch (error) {
@@ -204,10 +205,18 @@ async function sessionDestroy(id) {
     }
 }
 
-async function register(name, institution, email, password) {
+async function register(name, inviteId, institution, email, password) {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query('INSERT INTO users (name, id_institution, email, password) VALUES (?, ?, ?, ?)', [name, institution, email, hashedPassword]);
+        const [user] = await pool.query('INSERT INTO users (name, id_institution, email, password) VALUES (?, ?, ?, ?)', [name, institution, email, hashedPassword]);
+        
+        if(!user || user.affectedRows === 0) {
+            throw new Error('Erro ao criar usuário');
+        }
+        
+        await pool.query('UPDATE invites SET status = "accepted" WHERE id = ?', [inviteId]);
+
+        await pool.query('INSERT INTO audit_logs (action, user_id, id_institution, details, level) VALUES (?, ?, ?, ?, ?)', ['register', user.insertId, institution, email, 'info']);
 
         return await login(email, password);
         

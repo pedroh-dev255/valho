@@ -5,6 +5,9 @@ const userController = require('../controllers/userController');
 const permissionMiddleware = require('../middlewares/permissionMiddleware');
 
 router.get('/', permissionMiddleware('config.view'), configController.getConfigData);
+
+router.get('/activities', permissionMiddleware('activities.view'), configController.getActivities);
+
 router.get('/users', permissionMiddleware('users.view'), userController.getUsers);
 router.post('/users/invite', permissionMiddleware('users.invite'), userController.invite);
 router.get('/users/invite', permissionMiddleware('users.invite'), userController.getInvites);

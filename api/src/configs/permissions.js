@@ -75,6 +75,12 @@ module.exports = [
         description: 'Editar configurações do sistema'
     },
 
+    // ========================= ATIVIDADES =========================
+
+    {
+        key: 'activities.view',
+        description: 'Visualizar atividades recentes do sistema'
+    },
 
     // ======================== USUÁRIOS =============
     {

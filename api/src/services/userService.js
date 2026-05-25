@@ -31,6 +31,9 @@ async function createInvite(email, institutionId, createdBy) {
             throw new Error('Erro ao enviar email de convite');
         }
 
+        // cadastrar no audit log
+        await pool.query('INSERT INTO audit_logs (action, user_id, id_institution, details, level) VALUES (?, ?, ?, ?, ?)', ['create_invite', createdBy, institutionId, email, 'info']);
+
         // confirmar transação
         await pool.query('COMMIT');
         return result;
@@ -119,9 +122,12 @@ async function getInvitesByInstitution(InstitutionId) {
     }
 }
 
-async function deleteInvite(inviteId, institutionId) {
+async function deleteInvite(userId, inviteId, institutionId) {
     try {
         const [result] = await pool.query('UPDATE invites SET status = "expired" WHERE id = ? AND id_institution = ?', [inviteId, institutionId]);
+
+        await pool.query('INSERT INTO audit_logs (action, user_id, id_institution, details, level) VALUES (?, ?, ?, ?, ?)', ['delete_invite', userId, institutionId, inviteId, 'warning']);
+
         return result.affectedRows > 0;
     } catch (error) {
         throw new Error('Erro ao deletar convite: ' + error.message);

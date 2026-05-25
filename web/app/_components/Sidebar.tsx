@@ -13,7 +13,8 @@ import {
     Users,
     ShieldCheck,
     Mail,
-    SlidersHorizontal
+    SlidersHorizontal,
+    Activity
 } from "lucide-react";
 
 import {
@@ -152,6 +153,11 @@ export default function Sidebar({
                     label: "Geral",
                     icon: SlidersHorizontal,
                     url: "/configuracoes"
+                },
+                {
+                    label: "Atividades",
+                    icon: Activity,
+                    url: "/configuracoes/atividades"
                 },
                 {
                     label: "Usuários",

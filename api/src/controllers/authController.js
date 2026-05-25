@@ -97,7 +97,7 @@ async function registerController(req, res) {
         }
 
         
-        const user = await authService.register(name, inviteCheck.id, email, password);
+        const user = await authService.register(name, inviteCheck.inviteId, inviteCheck.id, email, password);
 
         if (!user) {
             return res.status(500).json({
@@ -116,8 +116,7 @@ async function registerController(req, res) {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Erro ao registrar usuário',
-            error: error.message
+            message: error.message
         });
     }
 }
@@ -135,8 +134,7 @@ async function logout(req, res) {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Erro ao realizar logout',
-            error: error.message
+            message: error.message,
         });
     }
 }
