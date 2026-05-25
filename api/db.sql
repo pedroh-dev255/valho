@@ -91,4 +91,15 @@ CREATE TABLE user_roles (
         ON DELETE CASCADE
 );
 
-select * from users;
+CREATE TABLE IF NOT EXISTS audit_logs(
+    id INT NOT NULL AUTO_INCREMENT,
+    id_institution INT NOT NULL,
+    user_id INT NOT NULL,
+    action VARCHAR(255) NOT NULL,
+    details TEXT,
+    level ENUM('info', 'good', 'warning', 'error') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY (id_institution) REFERENCES institutions(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
