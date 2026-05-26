@@ -11,14 +11,15 @@ async function getRoles(req, res) {
             });
         }
 
-        const { roles, permissions } = await roleService.getRoles(institutionId);
+        const { roles, permissions, users } = await roleService.getRoles(institutionId);
 
         return res.status(200).json({
             success: true,
             message: 'Permissões obtidas com sucesso',
             data: {
                 roles,
-                permissions
+                permissions,
+                users
             }
         });
     } catch (error) {

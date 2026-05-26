@@ -104,6 +104,8 @@ async function getRolesPermission(institutionId) {
             FROM permissions
         `);
 
+        const [users] = await pool.query(" SELECT id_institution, id, name, email, status FROM users WHERE status = 'active' AND id_institution = ?", [institutionId]);
+
         const roles = Array.from(rolesMap.values()).map((role) => {
 
             delete role._userIds;
@@ -113,7 +115,7 @@ async function getRolesPermission(institutionId) {
 
         });
 
-        return { roles, permissions: permissionsRows };
+        return { roles, permissions: permissionsRows, users };
     } catch (error) {
         throw new Error('Erro ao obter roles e permissões: ' + error.message);
     }

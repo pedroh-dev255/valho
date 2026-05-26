@@ -32,17 +32,231 @@ export default function Permissoes() {
     const [hasPermission, setHasPermission] = useState(true);
     const [groups, setGroups] = useState([]);
     const [allPermissions, setAllPermissions] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [selectedGroupId, setSelectedGroupId] = useState(1);
     const [menuOpenId, setMenuOpenId] = useState(null);
     const [usersExpanded, setUsersExpanded] = useState(false);
     const [createRoleModalOpen, setCreateRoleModalOpen] = useState(false);
+    const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+    const [selectedUsersToAdd, setSelectedUsersToAdd] = useState([]);
+    const [userSearch, setUserSearch] = useState("");
+
 
     const [newRole, setNewRole] = useState({
         name: "",
         description: ""
     });
+
+    const selectedGroup = useMemo(() => {
+        return (groups || []).find((g) => g.id === selectedGroupId);
+    }, [groups, selectedGroupId]);
+    
+    const availableUsers = useMemo(() => {
+
+        if (!selectedGroup) return [];
+
+        const currentUsersIds = selectedGroup.users.map((u) => u.id);
+
+        return allUsers.filter((user) =>
+            !currentUsersIds.includes(user.id)
+        );
+
+    }, [allUsers, selectedGroup]);
+
+    const filteredAvailableUsers = useMemo(() => {
+
+        return availableUsers.filter((user) =>
+            user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+            user.email.toLowerCase().includes(userSearch.toLowerCase())
+        );
+
+    }, [availableUsers, userSearch]);
+
+    function toggleUserSelection(userId) {
+        setSelectedUsersToAdd((prev) => {
+
+            if (prev.includes(userId)) {
+                return prev.filter((id) => id !== userId);
+            }
+
+            return [...prev, userId];
+
+        });
+
+    }
+
+    function addUsersToGroup() {
+        if (!selectedGroup) return;
+
+        if (selectedUsersToAdd.length === 0) {
+            toast.error("Selecione ao menos um usuário");
+            return;
+        }
+
+        const usersToAdd = allUsers.filter((user) =>
+            selectedUsersToAdd.includes(user.id)
+        );
+
+        const usersAlreadyInOtherGroups = usersToAdd.filter((user) =>
+            groups.some((group) =>
+                group.id !== selectedGroup.id &&
+                group.users.some((u) => u.id === user.id)
+            )
+        );
+
+        if (usersAlreadyInOtherGroups.length > 0) {
+
+            toast((t) => (
+                <div className="space-y-3">
+
+                    <div>
+                        <h3 className="font-semibold">
+                            Permissões cumulativas
+                        </h3>
+
+                        <p className="text-sm text-zinc-500 mt-1">
+                            Alguns usuários já pertencem a outros grupos.
+                            As permissões serão somadas.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            toast.dismiss(t.id);
+                            confirmAddUsers(usersToAdd);
+                        }}
+                        className="
+                            h-10 px-4 rounded-xl
+                            bg-amber-500
+                            text-black text-sm font-semibold
+                        "
+                    >
+                        Continuar
+                    </button>
+
+                </div>
+            ));
+
+            return;
+
+        }
+
+        confirmAddUsers(usersToAdd);
+
+    }
+
+    function confirmAddUsers(usersToAdd) {
+        const isAdminGroup =
+            selectedGroup?.name?.toLowerCase() === "administrador";
+
+        if (isAdminGroup) {
+
+            toast((t) => (
+                <div className="space-y-4 max-w-sm">
+
+                    <div className="flex items-start gap-3">
+
+                        <div
+                            className="
+                                w-10 h-10 rounded-xl
+                                bg-red-500/10
+                                text-red-500
+                                flex items-center justify-center
+                                shrink-0
+                            "
+                        >
+                            <AlertTriangle size={18} />
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold">
+                                Grupo Administrador
+                            </h3>
+
+                            <p className="text-sm text-zinc-500 mt-1">
+                                Este grupo possui acesso total ao sistema.
+                                Deseja realmente adicionar os usuários?
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div className="flex items-center gap-2">
+
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="
+                                flex-1 h-10 rounded-xl
+                                bg-zinc-200 dark:bg-zinc-800
+                                text-sm font-medium
+                            "
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            onClick={() => {
+
+                                toast.dismiss(t.id);
+
+                                applyUsersToGroup(usersToAdd);
+
+                            }}
+                            className="
+                                flex-1 h-10 rounded-xl
+                                bg-red-500
+                                text-white text-sm font-semibold
+                            "
+                        >
+                            Confirmar
+                        </button>
+
+                    </div>
+
+                </div>
+            ));
+
+            return;
+
+        }
+
+        applyUsersToGroup(usersToAdd);
+
+    }
+
+    function applyUsersToGroup(usersToAdd) {
+        setGroups((prev) =>
+            prev.map((group) => {
+
+                if (group.id !== selectedGroup.id) {
+                    return group;
+                }
+
+                return {
+                    ...group,
+                    users: [
+                        ...group.users,
+                        ...usersToAdd.map((user) => ({
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            active: true
+                        }))
+                    ]
+                };
+
+            })
+        );
+
+        setSelectedUsersToAdd([]);
+        setUserSearch("");
+        setAddUserModalOpen(false);
+
+        toast.success("Usuários adicionados ao grupo");
+
+    }
 
     async function fetchData() {
         try {
@@ -63,9 +277,11 @@ export default function Permissoes() {
 
             const roles = result?.data?.roles || [];
             const permissions = result?.data?.permissions || [];
+            const users = result?.data?.users || [];
 
             setGroups(roles);
             setAllPermissions(permissions);
+            setAllUsers(users);
 
             if (roles.length > 0) {
                 setSelectedGroupId(roles[0].id);
@@ -163,9 +379,7 @@ export default function Permissoes() {
         );
     }, [groups, search]);
 
-    const selectedGroup = useMemo(() => {
-        return (groups || []).find((g) => g.id === selectedGroupId);
-    }, [groups, selectedGroupId]);
+    
 
     const totalUsers = useMemo(() => {
 
@@ -1041,9 +1255,7 @@ export default function Permissoes() {
                                                                 </div>
 
                                                                 <button
-                                                                    onClick={() =>
-                                                                        toast.success("Abrir modal para adicionar usuário")
-                                                                    }
+                                                                    onClick={() => setAddUserModalOpen(true)}
                                                                     className="
                                                                         h-11 px-4
                                                                         rounded-2xl
@@ -1537,6 +1749,289 @@ export default function Permissoes() {
                                     >
                                         <Plus size={16} />
                                         Criar Grupo
+                                    </button>
+
+                                </div>
+
+                            </motion.div>
+
+                        </motion.div>
+
+                    )}
+
+                </AnimatePresence>
+                <AnimatePresence>
+                    {addUserModalOpen && (
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="
+                                fixed inset-0 z-[100]
+                                bg-black/60 backdrop-blur-sm
+                                flex items-center justify-center
+                                p-4
+                            "
+                        >
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                className="
+                                    w-full max-w-2xl
+                                    bg-white dark:bg-[#111113]
+                                    border border-zinc-200 dark:border-zinc-800
+                                    rounded-3xl
+                                    overflow-hidden
+                                "
+                            >
+
+                                {/* HEADER */}
+                                <div
+                                    className="
+                                        p-6
+                                        border-b border-zinc-200 dark:border-zinc-800
+                                        flex items-center justify-between gap-4
+                                    "
+                                >
+
+                                    <div>
+
+                                        <h2 className="text-2xl font-bold tracking-tight">
+                                            Adicionar usuários
+                                        </h2>
+
+                                        <p className="text-sm text-zinc-500 mt-1">
+                                            Adicione usuários ao grupo {selectedGroup?.name}
+                                        </p>
+
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+
+                                            setAddUserModalOpen(false);
+                                            setSelectedUsersToAdd([]);
+                                            setUserSearch("");
+
+                                        }}
+                                        className="
+                                            w-11 h-11
+                                            rounded-2xl
+                                            hover:bg-zinc-100
+                                            dark:hover:bg-zinc-800
+                                            transition-all
+                                            flex items-center justify-center
+                                        "
+                                    >
+                                        ✕
+                                    </button>
+
+                                </div>
+
+                                {/* SEARCH */}
+                                <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
+
+                                    <div
+                                        className="
+                                            h-12
+                                            rounded-2xl
+                                            border border-zinc-200 dark:border-zinc-800
+                                            bg-zinc-50 dark:bg-[#09090B]
+                                            px-4
+                                            flex items-center gap-3
+                                        "
+                                    >
+
+                                        <Search
+                                            size={18}
+                                            className="text-zinc-500"
+                                        />
+
+                                        <input
+                                            value={userSearch}
+                                            onChange={(e) =>
+                                                setUserSearch(e.target.value)
+                                            }
+                                            type="text"
+                                            placeholder="Buscar usuários..."
+                                            className="
+                                                bg-transparent
+                                                outline-none
+                                                w-full
+                                                text-sm
+                                                placeholder:text-zinc-500
+                                            "
+                                        />
+
+                                    </div>
+
+                                </div>
+
+                                {/* USERS */}
+                                <div className="p-6 max-h-[420px] overflow-y-auto space-y-3">
+
+                                    {filteredAvailableUsers.length === 0 && (
+
+                                        <div
+                                            className="
+                                                h-40
+                                                rounded-3xl
+                                                border border-dashed border-zinc-300 dark:border-zinc-700
+                                                flex items-center justify-center
+                                                text-zinc-500 text-sm
+                                            "
+                                        >
+                                            Nenhum usuário disponível
+                                        </div>
+
+                                    )}
+
+                                    {filteredAvailableUsers.map((user) => {
+
+                                        const selected =
+                                            selectedUsersToAdd.includes(user.id);
+
+                                        const alreadyInAnotherGroup = groups.some((group) =>
+                                            group.id !== selectedGroup.id &&
+                                            group.users.some((u) => u.id === user.id)
+                                        );
+
+                                        return (
+                                            <button
+                                                key={user.id}
+                                                onClick={() =>
+                                                    toggleUserSelection(user.id)
+                                                }
+                                                className={`
+                                                    w-full p-4
+                                                    rounded-2xl
+                                                    border
+                                                    transition-all
+                                                    text-left
+
+                                                    ${
+                                                        selected
+                                                            ? `
+                                                                border-emerald-500/40
+                                                                bg-emerald-500/10
+                                                            `
+                                                            : `
+                                                                border-zinc-200 dark:border-zinc-800
+                                                                bg-zinc-50 dark:bg-[#09090B]
+                                                            `
+                                                    }
+                                                `}
+                                            >
+
+                                                <div className="flex items-center justify-between gap-4">
+
+                                                    <div className="min-w-0">
+
+                                                        <h3 className="font-semibold truncate">
+                                                            {user.name}
+                                                        </h3>
+
+                                                        <p className="text-sm text-zinc-500 truncate mt-1">
+                                                            {user.email}
+                                                        </p>
+
+                                                        {alreadyInAnotherGroup && (
+                                                            <div
+                                                                className="
+                                                                    mt-3
+                                                                    inline-flex items-center gap-2
+                                                                    px-3 h-7
+                                                                    rounded-xl
+                                                                    bg-amber-500/10
+                                                                    text-amber-500
+                                                                    text-xs font-medium
+                                                                "
+                                                            >
+                                                                Permissões cumulativas
+                                                            </div>
+                                                        )}
+
+                                                    </div>
+
+                                                    <div
+                                                        className={`
+                                                            w-7 h-7 rounded-full
+                                                            flex items-center justify-center
+                                                            ${
+                                                                selected
+                                                                    ? "bg-emerald-500"
+                                                                    : "bg-zinc-300 dark:bg-zinc-700"
+                                                            }
+                                                        `}
+                                                    >
+
+                                                        <CheckCircle2
+                                                            size={14}
+                                                            className={
+                                                                selected
+                                                                    ? "text-black"
+                                                                    : "text-zinc-500"
+                                                            }
+                                                        />
+
+                                                    </div>
+
+                                                </div>
+
+                                            </button>
+                                        );
+
+                                    })}
+
+                                </div>
+
+                                {/* FOOTER */}
+                                <div
+                                    className="
+                                        p-6
+                                        border-t border-zinc-200 dark:border-zinc-800
+                                        flex items-center justify-end gap-3
+                                    "
+                                >
+
+                                    <button
+                                        onClick={() => {
+
+                                            setAddUserModalOpen(false);
+                                            setSelectedUsersToAdd([]);
+                                            setUserSearch("");
+
+                                        }}
+                                        className="
+                                            h-11 px-5
+                                            rounded-2xl
+                                            bg-zinc-200 dark:bg-zinc-800
+                                            hover:bg-zinc-300 dark:hover:bg-zinc-700
+                                            text-sm font-medium
+                                            transition-all
+                                        "
+                                    >
+                                        Cancelar
+                                    </button>
+
+                                    <button
+                                        onClick={addUsersToGroup}
+                                        className="
+                                            h-11 px-5
+                                            rounded-2xl
+                                            bg-emerald-500
+                                            hover:bg-emerald-400
+                                            text-black
+                                            text-sm font-semibold
+                                            transition-all
+                                            flex items-center gap-2
+                                        "
+                                    >
+                                        <Plus size={16} />
+                                        Adicionar usuários
                                     </button>
 
                                 </div>

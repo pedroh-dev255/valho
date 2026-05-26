@@ -14,7 +14,17 @@ import {
     ShieldCheck,
     Mail,
     SlidersHorizontal,
-    Activity
+    Activity,
+    Warehouse,
+    PackagePlus,
+    Tags,
+    Barcode,
+    PackageMinus,
+    ArrowLeftRight,
+    Truck,
+    ClipboardList,
+    FileBarChart2,
+    AlertTriangle
 } from "lucide-react";
 
 import {
@@ -140,7 +150,113 @@ export default function Sidebar({
         {
             label: "Estoque",
             icon: Boxes,
-            url: "/estoque"
+            url: "/estoque",
+            key: "estoque",
+
+            children: [
+                {
+                    label: "Produtos",
+                    icon: Boxes,
+                    url: "/estoque",
+                    key: "estoque",
+
+                    children: [
+                        {
+                            label: "Todos os Produtos",
+                            icon: Boxes,
+                            url: "/estoque"
+                        },
+                        {
+                            label: "Adicionar Produto",
+                            icon: PackagePlus,
+                            url: "/estoque/produtos/novo"
+                        },
+                        {
+                            label: "Categorias",
+                            icon: Tags,
+                            url: "/estoque/categorias"
+                        },
+                        {
+                            label: "Etiquetas / Código",
+                            icon: Barcode,
+                            url: "/estoque/etiquetas"
+                        }
+                    ]
+                },
+
+                {
+                    label: "Movimentações",
+                    icon: ArrowLeftRight,
+                    url: "/estoque/movimentacoes",
+
+                    children: [
+                        {
+                            label: "Entradas",
+                            icon: PackagePlus,
+                            url: "/estoque/entradas"
+                        },
+                        {
+                            label: "Saídas",
+                            icon: PackageMinus,
+                            url: "/estoque/saidas"
+                        },
+                        {
+                            label: "Transferências",
+                            icon: ArrowLeftRight,
+                            url: "/estoque/transferencias"
+                        },
+                        {
+                            label: "Histórico",
+                            icon: ClipboardList,
+                            url: "/estoque/historico"
+                        }
+                    ]
+                },
+
+                {
+                    label: "Armazéns",
+                    icon: Warehouse,
+                    url: "/estoque/armazens"
+                },
+
+                {
+                    label: "Fornecedores",
+                    icon: Truck,
+                    url: "/estoque/fornecedores"
+                },
+
+                {
+                    label: "Alertas",
+                    icon: AlertTriangle,
+                    url: "/estoque/alertas"
+                },
+
+                {
+                    label: "Relatórios",
+                    icon: FileBarChart2,
+                    url: "/estoque/relatorios",
+                    key: "relatorios",
+
+                    children: [
+                        {
+                            label: "Movimentações",
+                            icon: ClipboardList,
+                            url: "/estoque/relatorios/movimentacoes"
+                        },
+                        {
+                            label: "Produtos",
+                            icon: Boxes,
+                            url: "/estoque/relatorios/produtos"
+                        },
+                        {
+                            label: "Inventário",
+                            icon: Warehouse,
+                            url: "/estoque/relatorios/inventario"
+                        }
+                    ]
+                },
+            ]
+
         },
         {
             label: "Configurações",

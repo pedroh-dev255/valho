@@ -5,6 +5,7 @@ module.exports = [
         key: 'dashboard.view',
         description: 'Visualizar dashboard'
     },
+
     // ========================= ESTOQUE =========================
     {
         key: 'inventory.view',
@@ -22,6 +23,151 @@ module.exports = [
         key: 'inventory.edit',
         description: 'Editar itens do estoque'
     },
+
+    // NOVAS PERMISSÕES DE ESTOQUE
+
+    {
+        key: 'inventory.products.view',
+        description: 'Visualizar produtos'
+    },
+    {
+        key: 'inventory.products.add',
+        description: 'Cadastrar produtos'
+    },
+    {
+        key: 'inventory.products.edit',
+        description: 'Editar produtos'
+    },
+    {
+        key: 'inventory.products.delete',
+        description: 'Excluir produtos'
+    },
+
+    {
+        key: 'inventory.categories.view',
+        description: 'Visualizar categorias de estoque'
+    },
+    {
+        key: 'inventory.categories.add',
+        description: 'Cadastrar categorias de estoque'
+    },
+    {
+        key: 'inventory.categories.edit',
+        description: 'Editar categorias de estoque'
+    },
+    {
+        key: 'inventory.categories.delete',
+        description: 'Excluir categorias de estoque'
+    },
+
+    {
+        key: 'inventory.suppliers.view',
+        description: 'Visualizar fornecedores'
+    },
+    {
+        key: 'inventory.suppliers.add',
+        description: 'Cadastrar fornecedores'
+    },
+    {
+        key: 'inventory.suppliers.edit',
+        description: 'Editar fornecedores'
+    },
+    {
+        key: 'inventory.suppliers.delete',
+        description: 'Excluir fornecedores'
+    },
+
+    {
+        key: 'inventory.movements.view',
+        description: 'Visualizar movimentações de estoque'
+    },
+    {
+        key: 'inventory.movements.add',
+        description: 'Registrar movimentações de estoque'
+    },
+
+    {
+        key: 'inventory.adjustments.view',
+        description: 'Visualizar ajustes de inventário'
+    },
+    {
+        key: 'inventory.adjustments.add',
+        description: 'Criar ajustes de inventário'
+    },
+    {
+        key: 'inventory.adjustments.approve',
+        description: 'Aprovar ajustes de inventário'
+    },
+
+    {
+        key: 'inventory.transfers.view',
+        description: 'Visualizar transferências de estoque'
+    },
+    {
+        key: 'inventory.transfers.add',
+        description: 'Criar transferências de estoque'
+    },
+    {
+        key: 'inventory.transfers.approve',
+        description: 'Aprovar transferências de estoque'
+    },
+
+    {
+        key: 'inventory.purchase_orders.view',
+        description: 'Visualizar pedidos de compra'
+    },
+    {
+        key: 'inventory.purchase_orders.add',
+        description: 'Criar pedidos de compra'
+    },
+    {
+        key: 'inventory.purchase_orders.edit',
+        description: 'Editar pedidos de compra'
+    },
+    {
+        key: 'inventory.purchase_orders.delete',
+        description: 'Excluir pedidos de compra'
+    },
+    {
+        key: 'inventory.purchase_orders.receive',
+        description: 'Receber mercadorias no estoque'
+    },
+
+    {
+        key: 'inventory.locations.view',
+        description: 'Visualizar depósitos e locais'
+    },
+    {
+        key: 'inventory.locations.add',
+        description: 'Cadastrar depósitos e locais'
+    },
+    {
+        key: 'inventory.locations.edit',
+        description: 'Editar depósitos e locais'
+    },
+    {
+        key: 'inventory.locations.delete',
+        description: 'Excluir depósitos e locais'
+    },
+
+    {
+        key: 'inventory.costs.view',
+        description: 'Visualizar custos dos produtos'
+    },
+    {
+        key: 'inventory.costs.edit',
+        description: 'Editar custos dos produtos'
+    },
+
+    {
+        key: 'inventory.reports.view',
+        description: 'Visualizar relatórios de estoque'
+    },
+    {
+        key: 'inventory.reports.generate',
+        description: 'Gerar relatórios de estoque'
+    },
+
     // ========================= RELATÓRIOS =========================
     {
         key: 'reports.view',
@@ -31,7 +177,8 @@ module.exports = [
         key: 'reports.generate',
         description: 'Gerar relatórios'
     },
-    // ========================= TRANSAÇÕES DE SAIDAS =========================
+
+    // ========================= TRANSAÇÕES DE SAÍDA =========================
     {
         key: 'out_transactions.view',
         description: 'Visualizar lançamentos'
@@ -48,7 +195,8 @@ module.exports = [
         key: 'out_transactions.delete',
         description: 'Excluir lançamentos'
     },
-    // ========================= TRANSAÇÕES DE ENTRADAS =========================
+
+    // ========================= TRANSAÇÕES DE ENTRADA =========================
     {
         key: 'in_transactions.view',
         description: 'Visualizar entradas'
@@ -65,10 +213,11 @@ module.exports = [
         key: 'in_transactions.delete',
         description: 'Excluir entradas'
     },
+
     // ========================= CONFIG =========================
     {
         key: 'config.view',
-        description: 'Visualizar pagina de configurações do sistema'
+        description: 'Visualizar página de configurações do sistema'
     },
     {
         key: 'config.edit',
@@ -76,13 +225,12 @@ module.exports = [
     },
 
     // ========================= ATIVIDADES =========================
-
     {
         key: 'activities.view',
         description: 'Visualizar atividades recentes do sistema'
     },
 
-    // ======================== USUÁRIOS =============
+    // ========================= USUÁRIOS =========================
     {
         key: 'users.view',
         description: 'Visualizar usuários'
@@ -99,7 +247,8 @@ module.exports = [
         key: 'users.delete',
         description: 'Excluir usuários'
     },
-    // ======================== ROLES =============
+
+    // ========================= ROLES =========================
     {
         key: 'roles.view',
         description: 'Visualizar cargos'
@@ -116,7 +265,8 @@ module.exports = [
         key: 'roles.delete',
         description: 'Excluir cargos'
     },
-    // ======================== PERMISSIONS =============
+
+    // ========================= PERMISSIONS =========================
     {
         key: 'permissions.view',
         description: 'Visualizar permissões'
@@ -125,7 +275,8 @@ module.exports = [
         key: 'permissions.edit',
         description: 'Editar permissões'
     },
-    // ======================== ATRIBUIR ROLES A USUÁRIOS =============
+
+    // ========================= ATRIBUIR ROLES =========================
     {
         key: 'assign_roles.view',
         description: 'Visualizar atribuições de cargos'
