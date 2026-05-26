@@ -17,12 +17,12 @@ async function buildUserPermissions(userId) {
         WHERE ur.user_id = ?
     `, [userId]);
     
-    console.log(`Permissões do usuário ${userId} atualizadas:`, rows.map(r => r.key));
+    //console.log(`Permissões do usuário ${userId} atualizadas:`, rows.map(r => r.key));
     return rows.map(row => row.key);
 }
 
 async function refreshUserPermissions(userId) {
-    console.log(`Atualizando permissões do usuário ${userId}...`);
+    //console.log(`Atualizando permissões do usuário ${userId}...`);
     const permissions = await buildUserPermissions(userId);
 
     await redis.setEx(
@@ -41,17 +41,17 @@ async function getUserPermissions(userId) {
     const cached = await redis.get(cacheKey);
 
     if (cached) {
-        console.log(`Permissões do usuário ${userId} encontradas no cache.`);
+        //console.log(`Permissões do usuário ${userId} encontradas no cache.`);
         return JSON.parse(cached);
     }
-    console.log(`Permissões do usuário ${userId} não encontradas no cache. Recalculando...`);
+    //console.log(`Permissões do usuário ${userId} não encontradas no cache. Recalculando...`);
     return await refreshUserPermissions(userId);
 }
 
 async function invalidateUserPermissions(userId) {
 
     await redis.del(`perm:user:${userId}`);
-    console.log(`Permissões do usuário ${userId} invalidadas no cache.`);
+    //console.log(`Permissões do usuário ${userId} invalidadas no cache.`);
 }
 
 module.exports = {

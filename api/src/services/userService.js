@@ -87,7 +87,7 @@ async function getUsersByInstitution(institutionId) {
         const [adminCount] = await pool.query('SELECT COUNT(*) as total_admin FROM users u INNER JOIN user_roles ur ON u.id = ur.user_id INNER JOIN roles r ON ur.role_id = r.id WHERE u.id_institution = ? AND r.name = "Administrador" AND u.status = "active"', [institutionId]);
         const [pendingInvites] = await pool.query('SELECT COUNT(email) as total_pending FROM invites WHERE id_institution = ? AND status = "pending"', [institutionId]);
         
-        const [rows] = await pool.query("SELECT users.id AS id, users.name AS name, users.email AS email, users.status AS status, COALESCE(roles.name, 'Sem permissões cadastradas') AS role FROM users LEFT JOIN user_roles ON users.id = user_roles.user_id LEFT JOIN roles ON user_roles.role_id = roles.id WHERE users.id_institution = ?", [institutionId]);
+        const [rows] = await pool.query("SELECT users.id AS id, users.name AS name, users.email AS email, users.status AS status, COALESCE(roles.name, 'Sem grupo cadastrado') AS role FROM users LEFT JOIN user_roles ON users.id = user_roles.user_id LEFT JOIN roles ON user_roles.role_id = roles.id WHERE users.id_institution = ?", [institutionId]);
         
         return {
             total_active: activeCount[0].total_active,

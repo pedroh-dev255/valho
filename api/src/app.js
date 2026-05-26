@@ -7,6 +7,7 @@ const permissionMiddleware = require('./middlewares/permissionMiddleware');
 const authRoute = require('./routes/authRoute');
 const dashRoute = require('./routes/dashRoute');
 const configRoute = require('./routes/configRoute');
+const roleRoute = require('./routes/roleRoute');
 
 const { sendEmailService } = require('./services/mailerService');
 
@@ -33,21 +34,8 @@ app.post('/auth/validate', authMiddleware, (req, res) => {
 
 app.use('/api/data/dashboard', authMiddleware, dashRoute);
 app.use('/api/config', authMiddleware, configRoute);
+app.use('/api/roles', authMiddleware, roleRoute);
 
-app.post("/api/security", authMiddleware, permissionMiddleware("users."), async (req, res) => {
-    try {
-        return res.status(200).json({
-            success: true,
-            message: 'Ação massa'
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Erro ao verificar permissão',
-            error: error.message
-        });
-    }
-});
 
 
 module.exports = app;

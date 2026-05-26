@@ -1,5 +1,35 @@
 const pool = require('../configs/db');
 
+function formatActivities(activities){
+    for (const activity of activities) {
+        switch (activity.action) {
+            case 'add_role':
+                activity.details =
+                    `Usuário ${activity.user_name}(ID ${activity.user_id}) criou o Grupo: ${activity.details}`;
+                break;
+            case 'create_invite':
+                activity.details =
+                    `Usuário ${activity.user_name}(ID ${activity.user_id}) enviou um convite para ${activity.details}`;
+                break;
+            case 'register':
+                activity.details =
+                    `${activity.user_name}(ID ${activity.user_id}) se registrou com o email ${activity.details}`;
+                break;
+            case 'delete_invite':
+                activity.details =
+                    `Convite ID ${activity.details} foi deletado por ${activity.user_name}(ID ${activity.user_id})`;
+                break;
+            default:
+                activity.details =
+                    activity.details ||
+                    'Atividade registrada';
+                break;
+        }
+    }
+
+    return activities;
+};
+
 async function getActivities(
     institutionId,
     search = '',
@@ -65,7 +95,8 @@ async function getActivities(
                 a.created_at,
                 a.details,
                 a.level,
-                u.name as user_name
+                u.name as user_name,
+                u.id as user_id
             FROM audit_logs a
             JOIN users u
                 ON a.user_id = u.id
@@ -75,7 +106,7 @@ async function getActivities(
             OFFSET ?
         `;
 
-        const [activities] =
+        let [activities] =
             await pool.query(
                 dataQuery,
                 [
@@ -86,40 +117,7 @@ async function getActivities(
             );
 
         // FORMAT DETAILS
-        for (const activity of activities) {
-
-            switch (activity.action) {
-
-                case 'create_invite':
-
-                    activity.details =
-                        `Usuário ${activity.user_name} enviou um convite para ${activity.details}`;
-
-                    break;
-
-                case 'register':
-
-                    activity.details =
-                        `${activity.user_name} se registrou com o email ${activity.details}`;
-
-                    break;
-
-                case 'delete_invite':
-
-                    activity.details =
-                        `Convite ${activity.details} foi deletado por ${activity.user_name}`;
-
-                    break;
-
-                default:
-
-                    activity.details =
-                        activity.details ||
-                        'Atividade registrada';
-
-                    break;
-            }
-        }
+        activities = formatActivities(activities);
 
         return {
             activities,
@@ -145,5 +143,6 @@ async function getActivities(
 }
 
 module.exports = {
-    getActivities
+    getActivities,
+    formatActivities
 };

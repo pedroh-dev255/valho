@@ -180,7 +180,19 @@ export default function Sidebar({
                 {
                     label: "Permissões",
                     icon: ShieldCheck,
-                    url: "/configuracoes/permissoes"
+                    url: "/configuracoes/permissoes",
+                    children: [
+                        {
+                            label: "Permissões Por Grupo",
+                            icon: ShieldCheck,
+                            url: "/configuracoes/permissoes"
+                        },
+                        {
+                            label: "Permissões Por Usuário",
+                            icon: Users,
+                            url: "/configuracoes/permissoes/userPermission"
+                        },
+                    ]
                 }
             ]
         }

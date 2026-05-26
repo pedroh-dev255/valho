@@ -5,13 +5,12 @@ import { motion } from "framer-motion";
 import toast from 'react-hot-toast';
 import { AlertTriangle, Menu, Wallet } from "lucide-react";
 
-import Sidebar from "../_components/Sidebar";
+import Sidebar from "../../../_components/Sidebar";
 
 
-export default function Financeiro() {
+export default function userPermission() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [hasPermission, setHasPermission] = useState(true);
-
 
     const container = {
         hidden: {},
@@ -52,8 +51,8 @@ export default function Financeiro() {
                                 <Menu size={24} />
                             </button>
                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} >
-                                <h2 className="text-2xl font-bold tracking-tight"> Financeiro </h2>
-                                <p className="text-sm text-zinc-500 mt-1"> Gerencie a área financeira do sistema </p>
+                                <h2 className="text-2xl font-bold tracking-tight"> Permissões de Usuários </h2>
+                                <p className="text-sm text-zinc-500 mt-1"> Gerencie as permissões dos usuários do sistema </p>
                             </motion.div>
 
                         </div>
@@ -108,9 +107,10 @@ export default function Financeiro() {
                             <Menu size={24} />
                         </button>
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} >
-                            <h2 className="text-2xl font-bold tracking-tight"> Financeiro </h2>
-                            <p className="text-sm text-zinc-500 mt-1"> Gerencie a área financeira do sistema </p>
+                            <h2 className="text-2xl font-bold tracking-tight"> Permissões de Usuários </h2>
+                            <p className="text-sm text-zinc-500 mt-1"> Gerencie as permissões dos usuários do sistema </p>
                         </motion.div>
+
                     </div>
                 </header>
                 <motion.main
@@ -122,12 +122,10 @@ export default function Financeiro() {
                         space-y-6
                     "
                 >
-                    <div className="lg:ml-72 min-h-screen flex items-center justify-center">
-                        <div className="bg-white dark:bg-[#111113] border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 text-center">
-                            <img src="jack-hammer-construction-worker-ezgif.com-gif-maker.gif" alt="Site em Construção" className="mx-auto mb-4" />
-                            <h2 className="text-2xl font-semibold mb-2">Site em Construção</h2>
-                            <p className="text-zinc-500">Estamos trabalhando para trazer melhorias para você!</p>
-                        </div>
+                    <div className="bg-white dark:bg-[#111113] border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 text-center">
+                        <img src="../../jack-hammer-construction-worker-ezgif.com-gif-maker.gif" alt="Site em Construção" className="mx-auto mb-4" />
+                        <h2 className="text-2xl font-semibold mb-2">Site em Construção</h2>
+                        <p className="text-zinc-500">Estamos trabalhando para trazer melhorias para você!</p>
                     </div>
                 </motion.main>
             </div>

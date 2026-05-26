@@ -103,10 +103,3 @@ CREATE TABLE IF NOT EXISTS audit_logs(
     FOREIGN KEY (id_institution) REFERENCES institutions(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
-select * from audit_logs;
-select * from users;
-
-select * from permissions;
-
-insert into role_permissions (role_id, permission_id) values (1, 34);
